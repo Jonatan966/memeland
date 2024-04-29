@@ -20,16 +20,42 @@ import { Textarea } from "../../ui/textarea";
 import { useForm } from "react-hook-form";
 import { Input } from "../../ui/input";
 import { KeywordSelector } from "./keyword-selector";
+import { workerService } from "@/services/worker";
+import { Session } from "@supabase/supabase-js";
+import { useState } from "react";
+import { SunIcon } from "@radix-ui/react-icons";
+import { toast } from "sonner";
 
-export function CreateMemeDialog() {
+interface CreateMemeDialogProps {
+  session: Session;
+}
+
+export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
   const form = useForm();
+  const [isSendingMeme, setIsSendingMeme] = useState(false);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  function onSubmit(data: unknown) {
-    console.log(data);
+  async function onSubmit(data: any) {
+    setIsSendingMeme(true);
+
+    try {
+      await workerService.sendMeme({
+        ...data,
+        userToken: session.access_token,
+      });
+
+      setIsDialogOpen(false);
+
+      toast.success("Meme enviado com sucesso!");
+    } catch (error) {
+      console.log(error);
+    }
+
+    setIsSendingMeme(false);
   }
 
   return (
-    <Dialog>
+    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger>
         <Button>Novo meme</Button>
       </DialogTrigger>
@@ -41,7 +67,6 @@ export function CreateMemeDialog() {
             account and remove your data from our servers.
           </DialogDescription>
         </DialogHeader>
-
         <Form {...form}>
           <form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
             <FormField
@@ -84,11 +109,21 @@ export function CreateMemeDialog() {
 
             <div className="grid grid-cols-2 gap-2">
               <DialogClose asChild>
-                <Button variant="secondary" type="button">
+                <Button
+                  variant="secondary"
+                  type="button"
+                  disabled={isSendingMeme}
+                >
                   Cancelar
                 </Button>
               </DialogClose>
-              <Button type="submit">Enviar</Button>
+              <Button type="submit" disabled={isSendingMeme}>
+                {isSendingMeme ? (
+                  <SunIcon className="animate-spin" />
+                ) : (
+                  "Enviar"
+                )}
+              </Button>
             </div>
           </form>
         </Form>

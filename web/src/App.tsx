@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Session } from "@supabase/supabase-js";
 
-import { supabase } from "./services/supabase";
+import { Meme, supabase, supabaseService } from "./services/supabase";
 import { AppAuth } from "./components/domain/app-auth";
 import { Input } from "./components/ui/input";
 import { Profile } from "./components/domain/profile";
@@ -10,17 +10,26 @@ import { CreateMemeDialog } from "./components/domain/create-meme-dialog";
 
 export function App() {
   const [session, setSession] = useState<Session | null>(null);
+  const [memes, setMemes] = useState<Meme[]>([]);
+
+  function onLoginSuccess(session: Session | null) {
+    setSession(session);
+
+    if (session) {
+      supabaseService.findMemes(session.user.id).then(setMemes);
+    }
+  }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => onLoginSuccess(session));
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    } = supabase.auth.onAuthStateChange((_event, session) =>
+      onLoginSuccess(session)
+    );
 
     return () => subscription.unsubscribe();
   }, []);
@@ -35,7 +44,7 @@ export function App() {
         <nav className="py-4 flex items-center gap-4">
           <h1 className="font-bold text-2xl italic mr-auto">🐸 memeland</h1>
 
-          <CreateMemeDialog />
+          <CreateMemeDialog {...{ session }} />
           <Profile {...{ session }} />
         </nav>
 
@@ -45,21 +54,9 @@ export function App() {
       </header>
 
       <main className="container columns-1 sm:columns-2 md:columns-3 lg:columns-5">
-        <MemeCard />
-        <MemeCard />
-        <MemeCard />
-        <MemeCard />
-        <MemeCard />
-        <MemeCard />
-        <MemeCard />
-        <MemeCard />
-        <MemeCard />
-        <MemeCard />
-        <MemeCard />
-        <MemeCard />
-        <MemeCard />
-        <MemeCard />
-        <MemeCard />
+        {memes.map((meme) => (
+          <MemeCard key={meme.id} meme={meme} />
+        ))}
       </main>
     </>
   );
