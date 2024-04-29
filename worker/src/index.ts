@@ -15,12 +15,24 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { createClient } from "@supabase/supabase-js";
 import { OpenAI } from "openai";
 
+const corsHeaders = {
+  "Access-Control-Allow-Headers": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Origin": "*",
+};
+
 export default {
   async fetch(
     request: Request,
     env: Env,
     ctx: ExecutionContext,
   ): Promise<Response> {
+    if (request.method === "OPTIONS") {
+      return new Response("OK", {
+        headers: corsHeaders,
+      });
+    }
+
     const formData = await request.formData();
     const method = formData.get("method")!;
     const token = request.headers.get("authorization")!;
@@ -88,7 +100,12 @@ export default {
           file: memeFileKey,
         });
 
-        return new Response(JSON.stringify({ error }));
+        return new Response(JSON.stringify({ error }), {
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        });
       case "searchMemes":
         const query = String(formData.get("query"));
 
@@ -109,11 +126,22 @@ export default {
           },
         );
 
-        return new Response(JSON.stringify({ error: queryError, data }));
+        return new Response(JSON.stringify({ error: queryError, data }), {
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        });
     }
 
     return new Response(
       JSON.stringify({}),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
+      },
     );
   },
 };
