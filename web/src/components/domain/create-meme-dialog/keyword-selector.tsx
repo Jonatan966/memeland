@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/popover";
 import { CaretSortIcon } from "@radix-ui/react-icons";
 import { useRef, useState } from "react";
-import { UseFormReturn } from "react-hook-form";
 
 const frameworks = [
   {
@@ -42,30 +41,26 @@ const frameworks = [
 ];
 
 interface KeywordSelectorProps {
-  form: UseFormReturn;
+  keywords?: string[];
+  onChange(newKeywords: string[]): void;
 }
 
-export function KeywordSelector({ form }: KeywordSelectorProps) {
+export function KeywordSelector({
+  keywords = [],
+  onChange,
+}: KeywordSelectorProps) {
   const [open, setOpen] = useState(false);
-
-  const keywords = form.watch("keywords", []) as string[];
 
   const keywordSearchInputRef = useRef<HTMLInputElement>(null);
 
   function onAddNewKeyword() {
-    form.setValue("keywords", [
-      ...keywords,
-      keywordSearchInputRef.current!.value,
-    ]);
+    onChange([...keywords, keywordSearchInputRef.current!.value]);
 
     setOpen(false);
   }
 
   function onRemoveKeyword(keywordIndex: number) {
-    form.setValue(
-      "keywords",
-      keywords.filter((_, index) => index !== keywordIndex)
-    );
+    onChange(keywords.filter((_, index) => index !== keywordIndex));
   }
 
   return (
@@ -119,7 +114,7 @@ export function KeywordSelector({ form }: KeywordSelectorProps) {
                       key={framework.value}
                       value={framework.value}
                       onSelect={(currentValue: string) => {
-                        form.setValue("keywords", [...keywords, currentValue]);
+                        onChange([...keywords, currentValue]);
                         setOpen(false);
                       }}
                     >

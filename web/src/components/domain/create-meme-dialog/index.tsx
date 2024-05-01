@@ -30,12 +30,18 @@ interface CreateMemeDialogProps {
   session: Session;
 }
 
+interface CreateMemeDTO {
+  meme: File;
+  description: string;
+  keywords: string[];
+}
+
 export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
-  const form = useForm();
+  const form = useForm<CreateMemeDTO>();
   const [isSendingMeme, setIsSendingMeme] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  async function onSubmit(data: any) {
+  async function onSubmit(data: CreateMemeDTO) {
     setIsSendingMeme(true);
 
     try {
@@ -63,8 +69,7 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
         <DialogHeader>
           <DialogTitle>Novo meme</DialogTitle>
           <DialogDescription>
-            This action cannot be undone. This will permanently delete your
-            account and remove your data from our servers.
+            Preencha as informações abaixo para adicionar um novo meme
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
@@ -72,6 +77,9 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
             <FormField
               control={form.control}
               name="meme"
+              rules={{
+                required: true,
+              }}
               render={({ field: { value, onChange, ...field } }) => (
                 <FormItem>
                   <FormLabel>Meme</FormLabel>
@@ -80,7 +88,7 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
                       {...field}
                       className="w-full"
                       type="file"
-                      value={value?.fileName}
+                      value={value?.name}
                       onChange={(event) => onChange(event.target.files![0])}
                     />
                   </FormControl>
@@ -92,6 +100,9 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
             <FormField
               control={form.control}
               name="description"
+              rules={{
+                required: true,
+              }}
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Descrição</FormLabel>
@@ -105,7 +116,19 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
               )}
             />
 
-            <KeywordSelector {...{ form }} />
+            <FormField
+              control={form.control}
+              name="keywords"
+              rules={{
+                required: true,
+              }}
+              render={({ field }) => (
+                <KeywordSelector
+                  onChange={field.onChange}
+                  keywords={field.value}
+                />
+              )}
+            />
 
             <div className="grid grid-cols-2 gap-2">
               <DialogClose asChild>
