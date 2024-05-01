@@ -1,0 +1,9 @@
+.navigation {
+  grid-template-areas: "title newMeme user";
+}
+
+@media (max-width: 640px) {
+  .navigation {
+    grid-template-areas: "title title user" "newMeme newMeme newMeme";
+  }
+}

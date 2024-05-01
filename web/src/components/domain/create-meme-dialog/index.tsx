@@ -56,8 +56,8 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger>
-        <Button>Novo meme</Button>
+      <DialogTrigger asChild>
+        <Button style={{ gridArea: "newMeme" }}>Novo meme</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

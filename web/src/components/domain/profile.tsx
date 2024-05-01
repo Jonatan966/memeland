@@ -27,7 +27,12 @@ export function Profile({ session }: ProfileProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center h-10 gap-2 bg-zinc-800 rounded-full p-1 pr-4">
+        <button
+          className="flex items-center h-10 gap-2 bg-zinc-800 rounded-full p-1 pr-4"
+          style={{
+            gridArea: "user",
+          }}
+        >
           {isSigningOut ? (
             <span>Saindo...</span>
           ) : (

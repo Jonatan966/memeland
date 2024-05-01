@@ -9,6 +9,9 @@ import { MemeCard } from "./components/domain/meme-card";
 import { CreateMemeDialog } from "./components/domain/create-meme-dialog";
 import { MemeDetailsDialog } from "./components/domain/meme-details-dialog";
 
+import { cn } from "./lib/utils";
+import customStyles from "./custom.module.css";
+
 export function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [memes, setMemes] = useState<Meme[]>([]);
@@ -44,9 +47,19 @@ export function App() {
 
   return (
     <>
-      <header className="container mb-4">
-        <nav className="py-4 flex items-center gap-4">
-          <h1 className="font-bold text-2xl italic mr-auto">🐸 memeland</h1>
+      <header className="container max-sm:px-4 mb-4">
+        <nav
+          className={cn(
+            "py-4 grid grid-cols-[1fr_auto_auto] gap-4",
+            customStyles.navigation
+          )}
+        >
+          <h1
+            className="font-bold text-2xl italic mr-auto"
+            style={{ gridArea: "title" }}
+          >
+            🐸 memeland
+          </h1>
 
           <CreateMemeDialog {...{ session }} />
           <Profile {...{ session }} />
@@ -57,7 +70,7 @@ export function App() {
         </div>
       </header>
 
-      <main className="container columns-1 sm:columns-2 md:columns-3 lg:columns-5">
+      <main className="container max-sm:px-4 columns-1 sm:columns-2 md:columns-3 lg:columns-5">
         {memes.map((meme) => (
           <MemeCard
             key={meme.id}
