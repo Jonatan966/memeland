@@ -7,10 +7,14 @@ import { Input } from "./components/ui/input";
 import { Profile } from "./components/domain/profile";
 import { MemeCard } from "./components/domain/meme-card";
 import { CreateMemeDialog } from "./components/domain/create-meme-dialog";
+import { MemeDetailsDialog } from "./components/domain/meme-details-dialog";
 
 export function App() {
   const [session, setSession] = useState<Session | null>(null);
   const [memes, setMemes] = useState<Meme[]>([]);
+
+  const [selectedMeme, setSelectedMeme] = useState<Meme | null>(null);
+  const [isMemeDialogOpen, setIsMemeDialogOpen] = useState(false);
 
   function onLoginSuccess(session: Session | null) {
     setSession(session);
@@ -55,9 +59,22 @@ export function App() {
 
       <main className="container columns-1 sm:columns-2 md:columns-3 lg:columns-5">
         {memes.map((meme) => (
-          <MemeCard key={meme.id} meme={meme} />
+          <MemeCard
+            key={meme.id}
+            meme={meme}
+            onSelect={() => {
+              setSelectedMeme(meme);
+              setIsMemeDialogOpen(true);
+            }}
+          />
         ))}
       </main>
+
+      <MemeDetailsDialog
+        meme={selectedMeme}
+        isOpen={isMemeDialogOpen}
+        onClose={() => setIsMemeDialogOpen(false)}
+      />
     </>
   );
 }
