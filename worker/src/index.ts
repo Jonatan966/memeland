@@ -132,6 +132,36 @@ export default {
             ...corsHeaders,
           },
         });
+      case "generateKeywords":
+        const theDescription = String(formData.get("description"));
+
+        const keywordsResponse = await openaiClient.chat.completions.create({
+          model: "gpt-3.5-turbo-0125",
+          response_format: {
+            type: "json_object",
+          },
+          messages: [
+            {
+              role: "system",
+              content:
+                'Você receberá um bloco de texto e sua tarefa é extrair dele uma lista de palavras-chave. Responda apenas com lista de palavras-chave separadas por vírgula. Retorne um JSON no seguinte formato: ```{"keywords": ["key1", "key2", "etc"]}```',
+            },
+            {
+              role: "user",
+              content: theDescription,
+            },
+          ],
+        });
+
+        return new Response(
+          keywordsResponse.choices[0].message.content!,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              ...corsHeaders,
+            },
+          },
+        );
     }
 
     return new Response(
