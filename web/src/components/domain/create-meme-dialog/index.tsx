@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   Dialog,
   DialogClose,
@@ -23,7 +24,7 @@ import { KeywordSelector } from "./keyword-selector";
 import { workerService } from "@/services/worker";
 import { Session } from "@supabase/supabase-js";
 import { useState } from "react";
-import { SunIcon } from "@radix-ui/react-icons";
+import { ImageIcon, SunIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
 
 interface CreateMemeDialogProps {
@@ -60,10 +61,39 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
     setIsSendingMeme(false);
   }
 
+  async function onGenerateKeywords() {
+    const [description, oldKeywords = []] = form.getValues([
+      "description",
+      "keywords",
+    ]);
+
+    if (!description?.trim()) {
+      return;
+    }
+
+    const { keywords: newKeywords } = await workerService.generateKeywords({
+      description,
+      userToken: session.access_token,
+    });
+
+    form.setValue("keywords", [...new Set([...oldKeywords, ...newKeywords])]);
+  }
+
+  function onOpenChange(isOpen: boolean) {
+    if (isOpen) {
+      form.reset();
+    }
+
+    setIsDialogOpen(isOpen);
+  }
+
   return (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+    <Dialog open={isDialogOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button style={{ gridArea: "newMeme" }}>Novo meme</Button>
+        <Button className="h-full" style={{ gridArea: "newMeme" }}>
+          <ImageIcon className="mr-1" />
+          Novo meme
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -80,7 +110,7 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
               rules={{
                 required: true,
               }}
-              render={({ field: { value, onChange, ...field } }) => (
+              render={({ field: { onChange, value: _, ...field } }) => (
                 <FormItem>
                   <FormLabel>Meme</FormLabel>
                   <FormControl>
@@ -88,7 +118,6 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
                       {...field}
                       className="w-full"
                       type="file"
-                      value={value?.name}
                       onChange={(event) => onChange(event.target.files![0])}
                     />
                   </FormControl>
@@ -126,6 +155,7 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
                 <KeywordSelector
                   onChange={field.onChange}
                   keywords={field.value}
+                  onGenerateKeywords={onGenerateKeywords}
                 />
               )}
             />

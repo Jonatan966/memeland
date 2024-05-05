@@ -14,7 +14,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { CaretSortIcon } from "@radix-ui/react-icons";
+import { CaretSortIcon, SunIcon } from "@radix-ui/react-icons";
 import { useRef, useState } from "react";
 
 const frameworks = [
@@ -43,13 +43,16 @@ const frameworks = [
 interface KeywordSelectorProps {
   keywords?: string[];
   onChange(newKeywords: string[]): void;
+  onGenerateKeywords(): Promise<void>;
 }
 
 export function KeywordSelector({
   keywords = [],
   onChange,
+  onGenerateKeywords,
 }: KeywordSelectorProps) {
   const [open, setOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const keywordSearchInputRef = useRef<HTMLInputElement>(null);
 
@@ -63,13 +66,24 @@ export function KeywordSelector({
     onChange(keywords.filter((_, index) => index !== keywordIndex));
   }
 
+  async function handleGenerateKeywords() {
+    setIsGenerating(true);
+
+    await onGenerateKeywords();
+
+    setIsGenerating(false);
+  }
+
   return (
     <FormItem>
       <FormLabel>Palavras-chave</FormLabel>
 
       <div className="flex flex-wrap gap-1">
         {keywords.map((keyword, index) => (
-          <Badge key={keyword} onClick={() => onRemoveKeyword(index)}>
+          <Badge
+            key={keyword}
+            onClick={() => !isGenerating && onRemoveKeyword(index)}
+          >
             {keyword}
           </Badge>
         ))}
@@ -77,7 +91,7 @@ export function KeywordSelector({
 
       <div className="flex gap-2">
         <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild>
+          <PopoverTrigger asChild disabled={isGenerating}>
             <Button
               variant="outline"
               role="combobox"
@@ -127,7 +141,19 @@ export function KeywordSelector({
           </PopoverContent>
         </Popover>
 
-        <Button type="button">Gerar</Button>
+        <Button
+          type="button"
+          onClick={handleGenerateKeywords}
+          disabled={isGenerating}
+        >
+          {isGenerating ? (
+            <>
+              Gerando... <SunIcon className="animate-spin ml-2" />
+            </>
+          ) : (
+            "Gerar"
+          )}
+        </Button>
       </div>
 
       <FormDescription>
