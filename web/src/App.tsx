@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Session } from "@supabase/supabase-js";
+import { SunIcon } from "@radix-ui/react-icons";
 
 import { Meme, supabase, supabaseService } from "./services/supabase";
 import { AppAuth } from "./components/domain/app-auth";
@@ -13,6 +14,7 @@ import { cn } from "./lib/utils";
 import customStyles from "./custom.module.css";
 
 export function App() {
+  const [isLoadingSession, setIsLoadingSession] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
   const [memes, setMemes] = useState<Meme[]>([]);
 
@@ -21,6 +23,8 @@ export function App() {
 
   function onLoginSuccess(session: Session | null) {
     setSession(session);
+
+    setTimeout(() => setIsLoadingSession(false), 500);
 
     if (session) {
       supabaseService.findMemes(session.user.id).then(setMemes);
@@ -41,6 +45,15 @@ export function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  if (isLoadingSession) {
+    return (
+      <div className="absolute inset-0 flex flex-col items-center justify-center">
+        <SunIcon className="animate-spin w-8 h-8" />
+        <strong>Carregando sessão...</strong>
+      </div>
+    );
+  }
+
   if (!session) {
     return <AppAuth />;
   }
@@ -55,7 +68,7 @@ export function App() {
           )}
         >
           <h1
-            className="font-bold text-2xl italic mr-auto"
+            className="font-bold text-2xl italic mr-auto max-sm:text-xl flex items-center"
             style={{ gridArea: "title" }}
           >
             🐸 memeland
