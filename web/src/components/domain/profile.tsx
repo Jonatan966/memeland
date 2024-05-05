@@ -16,6 +16,10 @@ interface ProfileProps {
 export function Profile({ session }: ProfileProps) {
   const [isSigningOut, setIsSigningOut] = useState(false);
 
+  const avatarFallback = String(session?.user?.user_metadata?.name || "User")
+    .toUpperCase()
+    .substring(0, 2);
+
   async function onSignOut() {
     setIsSigningOut(true);
 
@@ -39,9 +43,11 @@ export function Profile({ session }: ProfileProps) {
             <>
               <Avatar className="w-8 h-8">
                 <AvatarImage src="https://github.com/Jonatan966.png" />
-                <AvatarFallback>JO</AvatarFallback>
+                <AvatarFallback>{avatarFallback}</AvatarFallback>
               </Avatar>
-              <span className="font-semibold">Usuário Tal</span>
+              <span className="font-semibold max-sm:text-sm">
+                {session.user.user_metadata?.name || "Eu"}
+              </span>
             </>
           )}
         </button>
