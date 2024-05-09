@@ -1,3 +1,5 @@
+import { Meme } from "./supabase";
+
 interface SendMemeProps {
   description: string;
   keywords: string[];
@@ -10,8 +12,20 @@ interface GenerateKeywordsProps {
   userToken: string;
 }
 
+interface SearchMemesProps {
+  query: string;
+  userToken: string;
+}
+
 interface GenerateKeywordsReturn {
   keywords: string[];
+}
+
+interface SearchMemesReturn {
+  data: Meme[];
+  error?: {
+    message: string;
+  };
 }
 
 export const workerService = {
@@ -43,6 +57,24 @@ export const workerService = {
 
     formData.append("method", "generateKeywords");
     formData.append("description", data.description);
+
+    const response = await fetch(import.meta.env.VITE_WORKER_URL, {
+      method: "POST",
+      body: formData,
+      headers: {
+        authorization: data.userToken,
+      },
+    });
+
+    const result = await response.json();
+
+    return result;
+  },
+  async searchMemes(data: SearchMemesProps): Promise<SearchMemesReturn> {
+    const formData = new FormData();
+
+    formData.append("method", "searchMemes");
+    formData.append("query", data.query);
 
     const response = await fetch(import.meta.env.VITE_WORKER_URL, {
       method: "POST",
