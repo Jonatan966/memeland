@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, KeyboardEvent } from "react";
 import { Session } from "@supabase/supabase-js";
 import { SunIcon } from "@radix-ui/react-icons";
 
@@ -12,26 +12,50 @@ import { MemeDetailsDialog } from "./components/domain/meme-details-dialog";
 
 import { cn } from "./lib/utils";
 import customStyles from "./custom.module.css";
+import { workerService } from "./services/worker";
 
 export function App() {
   const [isLoadingSession, setIsLoadingSession] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
+
   const [memes, setMemes] = useState<Meme[]>([]);
+  const [isRetrievingMemes, setIsRetrievingMemes] = useState(false);
 
   const [selectedMeme, setSelectedMeme] = useState<Meme | null>(null);
   const [isMemeDialogOpen, setIsMemeDialogOpen] = useState(false);
 
-  function onLoginSuccess(session: Session | null) {
-    setSession(session);
+  async function handleSearchMemes(event: KeyboardEvent<HTMLInputElement>) {
+    const query = event.currentTarget.value.trim();
 
-    setTimeout(() => setIsLoadingSession(false), 500);
-
-    if (session) {
-      supabaseService.findMemes(session.user.id).then(setMemes);
+    if (event.key !== "Enter" || !session?.access_token) {
+      return;
     }
+
+    setIsRetrievingMemes(true);
+
+    let memes: Meme[] = [];
+
+    if (query) {
+      const memesResult = await workerService.searchMemes({
+        userToken: session.access_token,
+        query,
+      });
+
+      memes = memesResult.data;
+    } else {
+      memes = await supabaseService.findMemes(session.user.id);
+    }
+
+    setMemes(memes);
+    setIsRetrievingMemes(false);
   }
 
   useEffect(() => {
+    function onLoginSuccess(session: Session | null) {
+      setSession(session);
+      setTimeout(() => setIsLoadingSession(false), 500);
+    }
+
     supabase.auth
       .getSession()
       .then(({ data: { session } }) => onLoginSuccess(session));
@@ -44,6 +68,14 @@ export function App() {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (!session?.user?.id) {
+      return;
+    }
+
+    supabaseService.findMemes(session.user.id).then(setMemes);
+  }, [session?.user?.id]);
 
   if (isLoadingSession) {
     return (
@@ -79,21 +111,29 @@ export function App() {
         </nav>
 
         <div>
-          <Input placeholder="pesquise por um termo" />
+          <Input
+            placeholder="pesquise por um termo"
+            onKeyDown={handleSearchMemes}
+          />
         </div>
       </header>
 
+      {isRetrievingMemes && (
+        <SunIcon className="animate-spin w-8 h-8 mx-auto" />
+      )}
+
       <main className="container max-sm:px-4 columns-1 sm:columns-2 md:columns-3 lg:columns-5">
-        {memes.map((meme) => (
-          <MemeCard
-            key={meme.id}
-            meme={meme}
-            onSelect={() => {
-              setSelectedMeme(meme);
-              setIsMemeDialogOpen(true);
-            }}
-          />
-        ))}
+        {!isRetrievingMemes &&
+          memes.map((meme) => (
+            <MemeCard
+              key={meme.id}
+              meme={meme}
+              onSelect={() => {
+                setSelectedMeme(meme);
+                setIsMemeDialogOpen(true);
+              }}
+            />
+          ))}
       </main>
 
       <MemeDetailsDialog
