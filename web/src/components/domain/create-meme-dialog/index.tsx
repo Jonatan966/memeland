@@ -43,6 +43,18 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   async function onSubmit(data: CreateMemeDTO) {
+    const maxFileSize = 1024 * 1500; //1.5MB
+
+    if (data.meme.size > maxFileSize) {
+      form.setError("meme", {
+        message: "O tamanho do arquivo pode ser até 1.5MB",
+      });
+
+      toast.error("O tamanho do arquivo pode ser até 1.5MB");
+
+      return;
+    }
+
     setIsSendingMeme(true);
 
     try {
@@ -119,6 +131,7 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
                       className="w-full"
                       type="file"
                       onChange={(event) => onChange(event.target.files![0])}
+                      accept="image/jpeg,image/webp,image/png,video/mp4,image/gif"
                     />
                   </FormControl>
                   <FormDescription>Selecione o arquivo do meme</FormDescription>
