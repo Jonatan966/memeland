@@ -1,6 +1,7 @@
 import { useState, useEffect, KeyboardEvent } from "react";
 import { Session } from "@supabase/supabase-js";
 import { SunIcon } from "@radix-ui/react-icons";
+import { toast } from "sonner";
 
 import { Meme, supabase, supabaseService } from "./services/supabase";
 import { AppAuth } from "./components/domain/app-auth";
@@ -35,18 +36,24 @@ export function App() {
 
     let memes: Meme[] = [];
 
-    if (query) {
-      const memesResult = await workerService.searchMemes({
-        userToken: session.access_token,
-        query,
-      });
+    try {
+      if (query) {
+        const memesResult = await workerService.searchMemes({
+          userToken: session.access_token,
+          query,
+        });
 
-      memes = memesResult.data;
-    } else {
-      memes = await supabaseService.findMemes(session.user.id);
+        memes = memesResult.data;
+      } else {
+        memes = await supabaseService.findMemes(session.user.id);
+      }
+
+      setMemes(memes);
+    } catch (error) {
+      console.log(error);
+      toast.error("Não foi possível fazer uma busca precisa no momento.");
     }
 
-    setMemes(memes);
     setIsRetrievingMemes(false);
   }
 
