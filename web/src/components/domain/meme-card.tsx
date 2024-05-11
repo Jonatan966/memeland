@@ -10,23 +10,19 @@ interface MemeCardProps {
 }
 
 export function MemeCard({ meme, onSelect }: MemeCardProps) {
-  const fileUrl = `${
-    import.meta.env.VITE_SUPABASE_URL
-  }/storage/v1/object/public/memes/${meme.file}`;
-
   const {
     memeHasCopySupport,
     memeTypeLabel,
     onCopyMemeContent,
     onCopyMemeLink,
-  } = useMeme(fileUrl);
+  } = useMeme(meme.file);
 
   return (
     <div
       className="relative cursor-pointer border hover:border-green-500 mb-4 group"
       onClick={onSelect}
     >
-      <img src={fileUrl} alt="Photo" className="w-full aspect-square" />
+      <img src={meme.file} alt="Photo" className="w-full aspect-square" />
 
       <div className="absolute inset-0 flex items-start">
         <Badge>{memeTypeLabel}</Badge>

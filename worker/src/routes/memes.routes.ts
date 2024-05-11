@@ -54,6 +54,9 @@ memesRouter.post(
       memeFile.name.lastIndexOf("."),
     );
     const memeFileKey = `${user.id}/${fileHash}${fileExtension}`;
+    const targetBucketName = "memes";
+    const memeFileUrl =
+      `${context.env.SUPABASE_STORAGE_BASE}/${targetBucketName}/${memeFileKey}`;
 
     await storageService.send(
       new PutObjectCommand({
@@ -74,7 +77,7 @@ memesRouter.post(
       description,
       keywords,
       user_id: user.id,
-      file: memeFileKey,
+      file: memeFileUrl,
     });
 
     return context.json({ error }, error ? 500 : 201);

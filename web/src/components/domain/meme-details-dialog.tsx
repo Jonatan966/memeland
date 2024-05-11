@@ -16,12 +16,9 @@ export function MemeDetailsDialog({
   isOpen,
   onClose,
 }: MemeDetailsDialogProps) {
-  const fileUrl = `${
-    import.meta.env.VITE_SUPABASE_URL
-  }/storage/v1/object/public/memes/${meme?.file}`;
-
-  const { memeHasCopySupport, onCopyMemeContent, onCopyMemeLink } =
-    useMeme(fileUrl);
+  const { memeHasCopySupport, onCopyMemeContent, onCopyMemeLink } = useMeme(
+    meme?.file
+  );
 
   if (!meme) {
     return <></>;
@@ -30,7 +27,7 @@ export function MemeDetailsDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="p-0 sm:grid flex flex-col grid-cols-2 w-full max-w-3xl">
-        <img src={fileUrl} className="h-full w-full bg-black" />
+        <img src={meme.file} className="h-full w-full bg-black" />
 
         <div className="p-6 flex flex-col">
           <div className="mb-2">
