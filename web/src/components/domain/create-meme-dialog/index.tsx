@@ -16,6 +16,7 @@ import {
   FormField,
   FormItem,
   FormLabel,
+  FormMessage,
 } from "../../ui/form";
 import { Textarea } from "../../ui/textarea";
 import { useForm } from "react-hook-form";
@@ -135,6 +136,7 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
                     />
                   </FormControl>
                   <FormDescription>Selecione o arquivo do meme</FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />
@@ -154,6 +156,7 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
                   <FormDescription>
                     Descreva o meme detalhadamente
                   </FormDescription>
+                  <FormMessage />
                 </FormItem>
               )}
             />
