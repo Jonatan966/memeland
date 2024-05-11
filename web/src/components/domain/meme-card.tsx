@@ -30,15 +30,10 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
           loop
           autoPlay
           preload="none"
-          className="w-full aspect-square"
+          className="w-full"
         />
       ) : (
-        <img
-          src={meme.file}
-          alt="Photo"
-          className="w-full aspect-square"
-          loading="lazy"
-        />
+        <img src={meme.file} alt="Photo" className="w-full" loading="lazy" />
       )}
 
       <div className="absolute inset-0 flex items-start">
