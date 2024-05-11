@@ -16,8 +16,8 @@ export const supabaseService = {
   async findMemes(user_id: string): Promise<Meme[]> {
     const { data } = await supabase
       .from("memes")
-      .select("id, description, keywords, file")
-      .eq("user_id", user_id);
+      .eq("user_id", user_id)
+      .order("created_at", { ascending: false });
 
     if (!data) {
       return [];
