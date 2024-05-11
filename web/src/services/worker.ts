@@ -29,20 +29,19 @@ interface SearchMemesReturn {
 }
 
 export const workerService = {
+  apiUrl: import.meta.env.VITE_WORKER_URL,
   async sendMeme(data: SendMemeProps) {
     const formData = new FormData();
 
-    formData.append("method", "sendMeme");
     formData.append("description", data.description);
     formData.append("keywords", JSON.stringify(data.keywords));
     formData.append("meme", data.meme);
 
-    const response = await fetch(import.meta.env.VITE_WORKER_URL, {
+    const response = await fetch(`${workerService.apiUrl}/memes`, {
       method: "POST",
       body: formData,
       headers: {
         authorization: data.userToken,
-        // "content-type": "multipart/form-data; boundary=X-WEB",
       },
     });
 
@@ -53,36 +52,34 @@ export const workerService = {
   async generateKeywords(
     data: GenerateKeywordsProps,
   ): Promise<GenerateKeywordsReturn> {
-    const formData = new FormData();
-
-    formData.append("method", "generateKeywords");
-    formData.append("description", data.description);
-
-    const response = await fetch(import.meta.env.VITE_WORKER_URL, {
-      method: "POST",
-      body: formData,
-      headers: {
-        authorization: data.userToken,
+    const response = await fetch(
+      `${workerService.apiUrl}/keywords`,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          description: data.description,
+        }),
+        headers: {
+          authorization: data.userToken,
+          "Content-Type": "application/json",
+        },
       },
-    });
+    );
 
     const result = await response.json();
 
     return result;
   },
   async searchMemes(data: SearchMemesProps): Promise<SearchMemesReturn> {
-    const formData = new FormData();
-
-    formData.append("method", "searchMemes");
-    formData.append("query", data.query);
-
-    const response = await fetch(import.meta.env.VITE_WORKER_URL, {
-      method: "POST",
-      body: formData,
-      headers: {
-        authorization: data.userToken,
+    const response = await fetch(
+      `${workerService.apiUrl}/memes/search?q=${data.query}`,
+      {
+        method: "GET",
+        headers: {
+          authorization: data.userToken,
+        },
       },
-    });
+    );
 
     const result = await response.json();
 
