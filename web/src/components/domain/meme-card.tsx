@@ -13,6 +13,7 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
   const {
     memeHasCopySupport,
     memeTypeLabel,
+    memeFileExtension,
     onCopyMemeContent,
     onCopyMemeLink,
   } = useMeme(meme.file);
@@ -22,7 +23,23 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
       className="relative cursor-pointer border hover:border-green-500 mb-4 group"
       onClick={onSelect}
     >
-      <img src={meme.file} alt="Photo" className="w-full aspect-square" />
+      {memeFileExtension === "mp4" ? (
+        <video
+          src={meme.file}
+          muted
+          loop
+          autoPlay
+          preload="none"
+          className="w-full aspect-square"
+        />
+      ) : (
+        <img
+          src={meme.file}
+          alt="Photo"
+          className="w-full aspect-square"
+          loading="lazy"
+        />
+      )}
 
       <div className="absolute inset-0 flex items-start">
         <Badge>{memeTypeLabel}</Badge>

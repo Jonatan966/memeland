@@ -16,9 +16,12 @@ export function MemeDetailsDialog({
   isOpen,
   onClose,
 }: MemeDetailsDialogProps) {
-  const { memeHasCopySupport, onCopyMemeContent, onCopyMemeLink } = useMeme(
-    meme?.file
-  );
+  const {
+    memeHasCopySupport,
+    memeFileExtension,
+    onCopyMemeContent,
+    onCopyMemeLink,
+  } = useMeme(meme?.file);
 
   if (!meme) {
     return <></>;
@@ -27,7 +30,15 @@ export function MemeDetailsDialog({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="p-0 sm:grid flex flex-col grid-cols-2 w-full max-w-3xl">
-        <img src={meme.file} className="h-full w-full bg-black" />
+        {memeFileExtension === "mp4" ? (
+          <video src={meme.file} className="h-full w-full" controls />
+        ) : (
+          <img
+            src={meme.file}
+            className="h-full w-full bg-black"
+            loading="lazy"
+          />
+        )}
 
         <div className="p-6 flex flex-col">
           <div className="mb-2">

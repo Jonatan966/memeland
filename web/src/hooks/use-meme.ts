@@ -55,6 +55,7 @@ export function useMeme(memeFileUrl = "") {
   return {
     memeHasCopySupport,
     memeTypeLabel,
+    memeFileExtension,
     onCopyMemeLink,
     onCopyMemeContent,
   };
