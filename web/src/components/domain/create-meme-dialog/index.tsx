@@ -30,6 +30,7 @@ import { toast } from "sonner";
 
 interface CreateMemeDialogProps {
   session: Session;
+  onAfterCreate(): void;
 }
 
 interface CreateMemeDTO {
@@ -38,7 +39,10 @@ interface CreateMemeDTO {
   keywords: string[];
 }
 
-export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
+export function CreateMemeDialog({
+  session,
+  onAfterCreate,
+}: CreateMemeDialogProps) {
   const form = useForm<CreateMemeDTO>();
   const [isSendingMeme, setIsSendingMeme] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -70,6 +74,8 @@ export function CreateMemeDialog({ session }: CreateMemeDialogProps) {
     } catch (error) {
       console.log(error);
     }
+
+    onAfterCreate();
 
     setIsSendingMeme(false);
   }

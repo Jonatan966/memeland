@@ -1,4 +1,4 @@
-import { useState, useEffect, KeyboardEvent } from "react";
+import { useState, useEffect, KeyboardEvent, useCallback } from "react";
 import { Session } from "@supabase/supabase-js";
 import { SunIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
@@ -24,6 +24,16 @@ export function App() {
 
   const [selectedMeme, setSelectedMeme] = useState<Meme | null>(null);
   const [isMemeDialogOpen, setIsMemeDialogOpen] = useState(false);
+
+  const onFetchMemes = useCallback(async () => {
+    if (!session?.user?.id) {
+      return;
+    }
+
+    const memes = await supabaseService.findMemes(session.user.id);
+
+    setMemes(memes);
+  }, [session?.user?.id]);
 
   async function handleSearchMemes(event: KeyboardEvent<HTMLInputElement>) {
     const query = event.currentTarget.value.trim();
@@ -77,12 +87,8 @@ export function App() {
   }, []);
 
   useEffect(() => {
-    if (!session?.user?.id) {
-      return;
-    }
-
-    supabaseService.findMemes(session.user.id).then(setMemes);
-  }, [session?.user?.id]);
+    onFetchMemes();
+  }, [onFetchMemes]);
 
   if (isLoadingSession) {
     return (
@@ -113,7 +119,7 @@ export function App() {
             🐸 memeland
           </h1>
 
-          <CreateMemeDialog {...{ session }} />
+          <CreateMemeDialog session={session} onAfterCreate={onFetchMemes} />
           <Profile {...{ session }} />
         </nav>
 
