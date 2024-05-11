@@ -1,44 +1,14 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
-import { FormDescription, FormItem, FormLabel } from "@/components/ui/form";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { CaretSortIcon, SunIcon } from "@radix-ui/react-icons";
-import { useRef, useState } from "react";
-
-const frameworks = [
-  {
-    value: "next.js",
-    label: "Next.js",
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit",
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-  },
-];
+  FormDescription,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { SunIcon } from "@radix-ui/react-icons";
+import { KeyboardEvent, useState } from "react";
 
 interface KeywordSelectorProps {
   keywords?: string[];
@@ -51,15 +21,18 @@ export function KeywordSelector({
   onChange,
   onGenerateKeywords,
 }: KeywordSelectorProps) {
-  const [open, setOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const keywordSearchInputRef = useRef<HTMLInputElement>(null);
+  function onAddNewKeyword(event: KeyboardEvent<HTMLInputElement>) {
+    if (event.key !== "Enter") {
+      return;
+    }
 
-  function onAddNewKeyword() {
-    onChange([...keywords, keywordSearchInputRef.current!.value]);
+    event.preventDefault();
 
-    setOpen(false);
+    onChange([...keywords, event.currentTarget.value]);
+
+    event.currentTarget.value = "";
   }
 
   function onRemoveKeyword(keywordIndex: number) {
@@ -90,56 +63,10 @@ export function KeywordSelector({
       </div>
 
       <div className="flex gap-2">
-        <Popover open={open} onOpenChange={setOpen}>
-          <PopoverTrigger asChild disabled={isGenerating}>
-            <Button
-              variant="outline"
-              role="combobox"
-              aria-expanded={open}
-              className="justify-between w-full"
-            >
-              Selecione uma palavra chave...
-              <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-            </Button>
-          </PopoverTrigger>
-
-          <PopoverContent className="p-0">
-            <Command>
-              <CommandInput
-                placeholder="Search framework..."
-                className="h-9"
-                ref={keywordSearchInputRef}
-              />
-              <Button
-                className="mx-1 mt-1"
-                variant="secondary"
-                type="button"
-                onClick={onAddNewKeyword}
-              >
-                Adicionar palavra-chave
-              </Button>
-
-              <CommandEmpty>Nenhuma palavra-chave foi encontrada.</CommandEmpty>
-
-              <CommandGroup>
-                <CommandList>
-                  {frameworks.map((framework) => (
-                    <CommandItem
-                      key={framework.value}
-                      value={framework.value}
-                      onSelect={(currentValue: string) => {
-                        onChange([...keywords, currentValue]);
-                        setOpen(false);
-                      }}
-                    >
-                      {framework.label}
-                    </CommandItem>
-                  ))}
-                </CommandList>
-              </CommandGroup>
-            </Command>
-          </PopoverContent>
-        </Popover>
+        <Input
+          placeholder="Escreva uma palavra-chave e pressione Enter"
+          onKeyDown={onAddNewKeyword}
+        />
 
         <Button
           type="button"
@@ -159,6 +86,8 @@ export function KeywordSelector({
       <FormDescription>
         Liste todos os pontos principais do meme
       </FormDescription>
+
+      <FormMessage />
     </FormItem>
   );
 }
