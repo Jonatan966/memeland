@@ -3,6 +3,7 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { FileIcon } from "@radix-ui/react-icons";
 import { useMeme } from "@/hooks/use-meme";
+import { useRef } from "react";
 
 interface MemeCardProps {
   meme: Meme;
@@ -10,13 +11,15 @@ interface MemeCardProps {
 }
 
 export function MemeCard({ meme, onSelect }: MemeCardProps) {
+  const memeImageRef = useRef<HTMLImageElement>(null);
+
   const {
     memeHasCopySupport,
     memeTypeLabel,
     memeFileExtension,
     onCopyMemeContent,
     onCopyMemeLink,
-  } = useMeme(meme.file);
+  } = useMeme(meme.file, memeImageRef);
 
   return (
     <div
@@ -33,7 +36,14 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
           className="w-full"
         />
       ) : (
-        <img src={meme.file} alt="Photo" className="w-full" loading="lazy" />
+        <img
+          src={meme.file}
+          alt="Photo"
+          className="w-full"
+          loading="lazy"
+          crossOrigin="anonymous"
+          ref={memeImageRef}
+        />
       )}
 
       <div className="absolute inset-0 flex items-start">

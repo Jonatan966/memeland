@@ -4,6 +4,7 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { useMeme } from "@/hooks/use-meme";
 import { FileIcon } from "@radix-ui/react-icons";
+import { useRef } from "react";
 
 interface MemeDetailsDialogProps {
   meme: Meme | null;
@@ -16,12 +17,14 @@ export function MemeDetailsDialog({
   isOpen,
   onClose,
 }: MemeDetailsDialogProps) {
+  const memeImageRef = useRef<HTMLImageElement>(null);
+
   const {
     memeHasCopySupport,
     memeFileExtension,
     onCopyMemeContent,
     onCopyMemeLink,
-  } = useMeme(meme?.file);
+  } = useMeme(meme?.file, memeImageRef);
 
   if (!meme) {
     return <></>;
