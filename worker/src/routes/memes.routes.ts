@@ -34,15 +34,15 @@ memesRouter.post(
     const memeFileData = await memeFile.arrayBuffer();
     const fileHash = await sha1(memeFileData);
 
-    const availableMemeFileTypes = [
-      "image/jpeg",
-      "image/webp",
-      "image/png",
-      "video/mp4",
-      "image/gif",
-    ];
+    const availableMemeFileTypes = {
+      "image/jpeg": "image",
+      "image/webp": "image",
+      "image/png": "image",
+      "video/mp4": "video",
+      "image/gif": "gif",
+    } as Record<string, string>;
 
-    if (!availableMemeFileTypes.includes(memeFile.type)) {
+    if (!(memeFile.type in availableMemeFileTypes)) {
       return context.json({
         error: {
           message: "File format is invalid",
@@ -60,7 +60,7 @@ memesRouter.post(
 
     await storageService.send(
       new PutObjectCommand({
-        Bucket: "memes",
+        Bucket: targetBucketName,
         Key: memeFileKey,
         Body: memeFileData as any,
         ContentType: memeFile.type,
@@ -78,6 +78,7 @@ memesRouter.post(
       keywords,
       user_id: user.id,
       file: memeFileUrl,
+      type: availableMemeFileTypes[memeFile.type],
     });
 
     return context.json({ error }, error ? 500 : 201);

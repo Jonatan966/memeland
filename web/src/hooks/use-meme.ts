@@ -4,13 +4,10 @@ import { getFileExtension } from "@/utils/get-file-extension";
 import { MouseEvent, RefObject } from "react";
 import { toast } from "sonner";
 
-const MEME_LABELS_PER_TYPE = {
-  png: "Imagem",
-  jpg: "Imagem",
-  jpeg: "Imagem",
-  webp: "Imagem",
+export const MEME_LABELS = {
+  image: "Imagem",
+  video: "Vídeo",
   gif: "GIF",
-  mp4: "Vídeo",
 } as Record<string, string>;
 
 const SUPPORTED_MEME_TYPES_TO_COPY = ["png", "jpg", "jpeg", "webp"];
@@ -23,9 +20,6 @@ export function useMeme(
   const memeHasCopySupport = SUPPORTED_MEME_TYPES_TO_COPY.includes(
     memeFileExtension,
   );
-
-  const memeTypeLabel = MEME_LABELS_PER_TYPE?.[memeFileExtension] ||
-    memeFileExtension;
 
   async function onCopyMemeLink(event: MouseEvent<HTMLButtonElement>) {
     event.stopPropagation();
@@ -70,7 +64,6 @@ export function useMeme(
 
   return {
     memeHasCopySupport,
-    memeTypeLabel,
     memeFileExtension,
     onCopyMemeLink,
     onCopyMemeContent,

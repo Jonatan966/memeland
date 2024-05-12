@@ -2,7 +2,7 @@ import { Meme } from "@/services/supabase";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { FileIcon } from "@radix-ui/react-icons";
-import { useMeme } from "@/hooks/use-meme";
+import { MEME_LABELS, useMeme } from "@/hooks/use-meme";
 import { useRef } from "react";
 
 interface MemeCardProps {
@@ -15,7 +15,6 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
 
   const {
     memeHasCopySupport,
-    memeTypeLabel,
     memeFileExtension,
     onCopyMemeContent,
     onCopyMemeLink,
@@ -47,7 +46,7 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
       )}
 
       <div className="absolute inset-0 flex items-start">
-        <Badge>{memeTypeLabel}</Badge>
+        <Badge>{MEME_LABELS?.[meme.type]}</Badge>
       </div>
       <div className="absolute bottom-1 left-1 right-1 opacity-0 group-hover:opacity-100 flex gap-1">
         {memeHasCopySupport && (

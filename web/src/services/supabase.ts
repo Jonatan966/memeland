@@ -5,6 +5,7 @@ export interface Meme {
   description: string;
   keywords: string[];
   file: string;
+  type: string;
 }
 
 export const supabase = createClient(
@@ -16,6 +17,7 @@ export const supabaseService = {
   async findMemes(user_id: string): Promise<Meme[]> {
     const { data } = await supabase
       .from("memes")
+      .select("id, description, keywords, file, type")
       .eq("user_id", user_id)
       .order("created_at", { ascending: false });
 
