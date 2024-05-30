@@ -1,4 +1,4 @@
-import { useState, useEffect, KeyboardEvent, useCallback } from "react";
+import { useState, useEffect, KeyboardEvent, useCallback, useRef } from "react";
 import { Session } from "@supabase/supabase-js";
 import { SunIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
@@ -14,26 +14,60 @@ import { MemeDetailsDialog } from "./components/domain/meme-details-dialog";
 import { cn } from "./lib/utils";
 import customStyles from "./custom.module.css";
 import { workerService } from "./services/worker";
+import { Button } from "./components/ui/button";
+import { useDebounce } from "./hooks/use-debounce";
 
 export function App() {
+  const navigationButtonRef = useRef<HTMLButtonElement>(null);
+
   const [isLoadingSession, setIsLoadingSession] = useState(true);
   const [session, setSession] = useState<Session | null>(null);
 
+  const [pagination, setPagination] = useState({
+    itemsPerPage: 20,
+    currentPage: 0,
+  });
+  const [totalMemes, setTotalMemes] = useState(0);
   const [memes, setMemes] = useState<Meme[]>([]);
   const [isRetrievingMemes, setIsRetrievingMemes] = useState(false);
 
   const [selectedMeme, setSelectedMeme] = useState<Meme | null>(null);
   const [isMemeDialogOpen, setIsMemeDialogOpen] = useState(false);
 
+  const hasNextPage = memes.length < totalMemes;
+
   const onFetchMemes = useCallback(async () => {
     if (!session?.user?.id) {
       return;
     }
 
-    const memes = await supabaseService.findMemes(session.user.id);
+    const reset = pagination.currentPage === 0;
 
-    setMemes(memes);
-  }, [session?.user?.id]);
+    const { data: memes, count } = await supabaseService.findMemes({
+      user_id: session.user.id,
+      items_per_page: pagination.itemsPerPage,
+      current_page: pagination.currentPage,
+    });
+
+    setMemes((old) => (reset ? memes : [...old, ...memes]));
+    setTotalMemes(count);
+  }, [session?.user?.id, pagination]);
+
+  const debounceRequestNextPage = useDebounce(
+    () => navigationButtonRef?.current?.click(),
+    200
+  );
+
+  function onRequestNextPage() {
+    setPagination((oldPagination) => ({
+      ...oldPagination,
+      currentPage: oldPagination.currentPage + 1,
+    }));
+  }
+
+  function onRequestFirstPage() {
+    setPagination((old) => ({ ...old, currentPage: 0 }));
+  }
 
   async function handleSearchMemes(event: KeyboardEvent<HTMLInputElement>) {
     const query = event.currentTarget.value.trim();
@@ -44,8 +78,6 @@ export function App() {
 
     setIsRetrievingMemes(true);
 
-    let memes: Meme[] = [];
-
     try {
       if (query) {
         const memesResult = await workerService.searchMemes({
@@ -53,12 +85,11 @@ export function App() {
           query,
         });
 
-        memes = memesResult.data;
+        setMemes(memesResult.data);
+        setTotalMemes(memesResult.data.length);
       } else {
-        memes = await supabaseService.findMemes(session.user.id);
+        onRequestFirstPage();
       }
-
-      setMemes(memes);
     } catch (error) {
       console.log(error);
       toast.error("Não foi possível fazer uma busca precisa no momento.");
@@ -90,6 +121,21 @@ export function App() {
     onFetchMemes();
   }, [onFetchMemes]);
 
+  useEffect(() => {
+    const handleInfiniteScroll = () => {
+      const endOfPage =
+        window.innerHeight + window.pageYOffset >= document.body.offsetHeight;
+
+      if (endOfPage) {
+        debounceRequestNextPage();
+      }
+    };
+
+    window.addEventListener("scroll", handleInfiniteScroll);
+
+    return () => window.removeEventListener("scroll", handleInfiniteScroll);
+  }, []);
+
   if (isLoadingSession) {
     return (
       <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -119,7 +165,10 @@ export function App() {
             🐸 memeland
           </h1>
 
-          <CreateMemeDialog session={session} onAfterCreate={onFetchMemes} />
+          <CreateMemeDialog
+            session={session}
+            onAfterCreate={onRequestFirstPage}
+          />
           <Profile {...{ session }} />
         </nav>
 
@@ -148,6 +197,14 @@ export function App() {
             />
           ))}
       </main>
+
+      <div className="container flex justify-center my-2">
+        {hasNextPage && (
+          <Button ref={navigationButtonRef} onClick={onRequestNextPage}>
+            Ver mais
+          </Button>
+        )}
+      </div>
 
       <MemeDetailsDialog
         meme={selectedMeme}
