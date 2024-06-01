@@ -8,6 +8,9 @@
 
 ## Metas para o futuro
 
+- [ ] Melhorar carregamento dos memes
+  - [ ] Passar a salvar as dimensões do meme
+  - [ ] Criar uma imagem fake para o carregamento do meme
 - [ ] Editar/Deletar memes
 - [ ] Registrar frequência que o meme é copiado
   - [ ] Ordenar memes por frequência de cópia
