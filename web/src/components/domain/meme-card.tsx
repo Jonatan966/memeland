@@ -3,7 +3,7 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { FileIcon } from "@radix-ui/react-icons";
 import { MEME_LABELS, useMeme } from "@/hooks/use-meme";
-import { useRef } from "react";
+import { useMemo, useRef } from "react";
 
 interface MemeCardProps {
   meme: Meme;
@@ -12,6 +12,7 @@ interface MemeCardProps {
 
 export function MemeCard({ meme, onSelect }: MemeCardProps) {
   const memeImageRef = useRef<HTMLImageElement>(null);
+  const fakeImageRef = useRef<HTMLImageElement>(null);
 
   const {
     memeHasCopySupport,
@@ -19,6 +20,16 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
     onCopyMemeContent,
     onCopyMemeLink,
   } = useMeme(meme, memeImageRef);
+
+  const fakeMemeImage = useMemo(() => {
+    const reduceScale = 0.5;
+    const canvas = document.createElement("canvas");
+
+    canvas.width = (meme?.width || 500) * reduceScale;
+    canvas.height = (meme?.height || 500) * reduceScale;
+
+    return canvas.toDataURL("base64");
+  }, [meme]);
 
   return (
     <div
@@ -33,17 +44,27 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
           autoPlay
           preload="none"
           className="w-full"
+          style={{ display: "none" }}
+          onLoadedData={(event) => {
+            fakeImageRef.current?.remove();
+            event.currentTarget.style.display = "initial";
+          }}
         />
       ) : (
-        <img
-          src={meme.file}
-          alt="Photo"
-          className="w-full"
-          loading="lazy"
-          crossOrigin="anonymous"
-          ref={memeImageRef}
-        />
+        <>
+          <img
+            src={meme.file}
+            alt="Photo"
+            className="w-full"
+            loading="lazy"
+            crossOrigin="anonymous"
+            ref={memeImageRef}
+            onLoad={() => fakeImageRef.current?.remove()}
+          />
+        </>
       )}
+
+      <img src={fakeMemeImage} alt="fake image" ref={fakeImageRef} />
 
       <div className="absolute inset-0 flex items-start">
         <Badge>{MEME_LABELS?.[meme.type]}</Badge>
