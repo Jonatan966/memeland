@@ -3,7 +3,12 @@ import { Session } from "@supabase/supabase-js";
 import { SunIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
 
-import { Meme, supabase, supabaseService } from "./services/supabase";
+import {
+  Meme,
+  MemeOrderingConfig,
+  supabase,
+  supabaseService,
+} from "./services/supabase";
 import { AppAuth } from "./components/domain/app-auth";
 import { Input } from "./components/ui/input";
 import { Profile } from "./components/domain/profile";
@@ -16,6 +21,38 @@ import customStyles from "./custom.module.css";
 import { workerService } from "./services/worker";
 import { Button } from "./components/ui/button";
 import { useDebounce } from "./hooks/use-debounce";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "./components/ui/select";
+
+type OrderingType =
+  | "creation_new"
+  | "creation_old"
+  | "frequency_big"
+  | "frequency_small";
+
+const orderingConfigs = {
+  creation_new: {
+    by: "created_at",
+    ascending: false,
+  },
+  creation_old: {
+    by: "created_at",
+    ascending: true,
+  },
+  frequency_big: {
+    by: "frequency",
+    ascending: false,
+  },
+  frequency_small: {
+    by: "frequency",
+    ascending: true,
+  },
+} satisfies Record<OrderingType, MemeOrderingConfig>;
 
 export function App() {
   const navigationButtonRef = useRef<HTMLButtonElement>(null);
@@ -26,6 +63,7 @@ export function App() {
   const [pagination, setPagination] = useState({
     itemsPerPage: 20,
     currentPage: 0,
+    order: "creation_new" as OrderingType,
   });
   const [totalMemes, setTotalMemes] = useState(0);
   const [memes, setMemes] = useState<Meme[]>([]);
@@ -47,6 +85,7 @@ export function App() {
       user_id: session.user.id,
       items_per_page: pagination.itemsPerPage,
       current_page: pagination.currentPage,
+      order: orderingConfigs[pagination.order],
     });
 
     setMemes((old) => (reset ? memes : [...old, ...memes]));
@@ -172,11 +211,38 @@ export function App() {
           <Profile {...{ session }} />
         </nav>
 
-        <div>
+        <div className="flex gap-2 max-sm:flex-col">
           <Input
             placeholder="pesquise por um termo"
             onKeyDown={handleSearchMemes}
           />
+
+          <Select
+            defaultValue={pagination.order}
+            onValueChange={(newOrder: OrderingType) =>
+              setPagination((old) => ({
+                ...old,
+                currentPage: 0,
+                order: newOrder,
+              }))
+            }
+          >
+            <SelectTrigger className="sm:w-64">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="creation_new">
+                Criação (Mais recente)
+              </SelectItem>
+              <SelectItem value="creation_old">
+                Criação (Mais antigo)
+              </SelectItem>
+              <SelectItem value="frequency_big">Frequência (Maior)</SelectItem>
+              <SelectItem value="frequency_small">
+                Frequência (Menor)
+              </SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </header>
 

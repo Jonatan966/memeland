@@ -8,10 +8,16 @@ export interface Meme {
   type: string;
 }
 
+export interface MemeOrderingConfig {
+  by: "created_at" | "frequency";
+  ascending: boolean;
+}
+
 interface FindMemesProps {
   user_id: string;
   items_per_page: number;
   current_page?: number;
+  order?: MemeOrderingConfig;
 }
 
 export const supabase = createClient(
@@ -21,7 +27,12 @@ export const supabase = createClient(
 
 export const supabaseService = {
   async findMemes(
-    { user_id, items_per_page, current_page = 0 }: FindMemesProps,
+    {
+      user_id,
+      items_per_page,
+      current_page = 0,
+      order = { by: "created_at", ascending: false },
+    }: FindMemesProps,
   ): Promise<{ data: Meme[]; count: number }> {
     const from = current_page * items_per_page;
     const to = from + items_per_page;
@@ -30,7 +41,7 @@ export const supabaseService = {
       .from("memes")
       .select("id, description, keywords, file, type", { count: "exact" })
       .eq("user_id", user_id)
-      .order("created_at", { ascending: false })
+      .order(order.by, { ascending: order.ascending })
       .range(from + Number(from > 0), to);
 
     if (!data) {
