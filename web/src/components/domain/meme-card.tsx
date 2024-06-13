@@ -18,7 +18,7 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
     memeFileExtension,
     onCopyMemeContent,
     onCopyMemeLink,
-  } = useMeme(meme.file, memeImageRef);
+  } = useMeme(meme, memeImageRef);
 
   return (
     <div

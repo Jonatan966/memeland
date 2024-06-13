@@ -24,7 +24,7 @@ export function MemeDetailsDialog({
     memeFileExtension,
     onCopyMemeContent,
     onCopyMemeLink,
-  } = useMeme(meme?.file, memeImageRef);
+  } = useMeme(meme, memeImageRef);
 
   if (!meme) {
     return <></>;

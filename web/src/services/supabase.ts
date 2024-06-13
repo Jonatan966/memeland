@@ -39,4 +39,21 @@ export const supabaseService = {
 
     return { data, count: count || 0 };
   },
+  async incrementFrequency(memeId: string) {
+    const memeResponse = await supabase.from("memes").select("frequency")
+      .eq(
+        "id",
+        memeId,
+      );
+
+    const targetMeme = memeResponse.data?.[0];
+
+    if (!targetMeme) {
+      return false;
+    }
+
+    await supabase.from("memes").update({
+      frequency: targetMeme.frequency + 1,
+    }).eq("id", memeId);
+  },
 };
