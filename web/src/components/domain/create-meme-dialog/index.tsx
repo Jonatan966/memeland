@@ -27,6 +27,7 @@ import { Session } from "@supabase/supabase-js";
 import { useState } from "react";
 import { ImageIcon, SunIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
+import { getFileDimensions } from "@/utils/get-file-dimensions";
 
 interface CreateMemeDialogProps {
   session: Session;
@@ -63,9 +64,12 @@ export function CreateMemeDialog({
     setIsSendingMeme(true);
 
     try {
+      const fileDimensions = await getFileDimensions(data.meme);
+
       await workerService.sendMeme({
         ...data,
         userToken: session.access_token,
+        dimensions: fileDimensions,
       });
 
       setIsDialogOpen(false);

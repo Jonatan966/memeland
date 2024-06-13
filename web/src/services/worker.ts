@@ -1,3 +1,4 @@
+import { FileDimensions } from "@/utils/get-file-dimensions";
 import { Meme } from "./supabase";
 
 interface SendMemeProps {
@@ -5,6 +6,7 @@ interface SendMemeProps {
   keywords: string[];
   meme: File;
   userToken: string;
+  dimensions?: FileDimensions;
 }
 
 interface GenerateKeywordsProps {
@@ -36,6 +38,7 @@ export const workerService = {
     formData.append("description", data.description);
     formData.append("keywords", JSON.stringify(data.keywords));
     formData.append("meme", data.meme);
+    formData.append("dimensions", JSON.stringify(data.dimensions));
 
     const response = await fetch(`${workerService.apiUrl}/memes`, {
       method: "POST",

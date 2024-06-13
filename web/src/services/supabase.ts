@@ -6,6 +6,8 @@ export interface Meme {
   keywords: string[];
   file: string;
   type: string;
+  width?: number;
+  height?: number;
 }
 
 export interface MemeOrderingConfig {
