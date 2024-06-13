@@ -29,6 +29,7 @@ memesRouter.post(
 
     const description = String(formData.get("description"));
     const keywords = JSON.parse(String(formData.get("keywords")));
+    const dimensions = JSON.parse(String(formData.get("dimensions")));
 
     const memeFile = formData.get("meme") as File;
     const memeFileData = await memeFile.arrayBuffer();
@@ -79,6 +80,8 @@ memesRouter.post(
       user_id: user.id,
       file: memeFileUrl,
       type: availableMemeFileTypes[memeFile.type],
+      width: dimensions?.width,
+      height: dimensions?.height,
     });
 
     return context.json({ error }, error ? 500 : 201);
