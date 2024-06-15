@@ -31,8 +31,13 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
     return canvas.toDataURL("base64");
   }, [meme]);
 
+  if (meme.isDummy) {
+    return <img src={fakeMemeImage} alt="fake image" ref={fakeImageRef} />;
+  }
+
   return (
     <div
+      data-index={meme?.index}
       className="relative cursor-pointer border hover:border-green-500 mb-4 group"
       onClick={onSelect}
     >

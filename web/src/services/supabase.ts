@@ -8,6 +8,8 @@ export interface Meme {
   type: string;
   width?: number;
   height?: number;
+  index?: number;
+  isDummy?: boolean;
 }
 
 export interface MemeOrderingConfig {

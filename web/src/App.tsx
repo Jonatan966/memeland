@@ -1,4 +1,11 @@
-import { useState, useEffect, KeyboardEvent, useCallback, useRef } from "react";
+import {
+  useState,
+  useEffect,
+  KeyboardEvent,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import { Session } from "@supabase/supabase-js";
 import { SunIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
@@ -28,6 +35,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "./components/ui/select";
+import { useMediaQuery } from "./hooks/use-media-query";
+import { sortDataToMasonry } from "./utils/sort-data-to-masonry";
 
 type OrderingType =
   | "creation_new"
@@ -72,6 +81,12 @@ export function App() {
   const [selectedMeme, setSelectedMeme] = useState<Meme | null>(null);
   const [isMemeDialogOpen, setIsMemeDialogOpen] = useState(false);
 
+  const responsiveColsIndex = useMediaQuery([
+    "(max-width: 639px)",
+    "(max-width: 767px)",
+    "(max-width: 1023px)",
+  ]);
+
   const hasNextPage = memes.length < totalMemes;
 
   const onFetchMemes = useCallback(async () => {
@@ -91,6 +106,22 @@ export function App() {
     setMemes((old) => (reset ? memes : [...old, ...memes]));
     setTotalMemes(count);
   }, [session?.user?.id, pagination]);
+
+  const responsiveMemes = useMemo(() => {
+    const cols = (responsiveColsIndex < 0 ? 4 : responsiveColsIndex) + 1;
+
+    const mountDummyMeme = () =>
+      ({
+        id: crypto.randomUUID(),
+        isDummy: true,
+      } as Meme);
+
+    return sortDataToMasonry(
+      memes.map((m, i) => ({ ...m, index: i })),
+      cols,
+      mountDummyMeme
+    );
+  }, [memes, responsiveColsIndex]);
 
   const debounceRequestNextPage = useDebounce(
     () => navigationButtonRef?.current?.click(),
@@ -163,7 +194,7 @@ export function App() {
   useEffect(() => {
     const handleInfiniteScroll = () => {
       const endOfPage =
-        window.innerHeight + window.pageYOffset >= document.body.offsetHeight;
+        window.innerHeight + window.scrollY >= document.body.offsetHeight;
 
       if (endOfPage) {
         debounceRequestNextPage();
@@ -252,7 +283,7 @@ export function App() {
 
       <main className="container max-sm:px-4 columns-1 sm:columns-2 md:columns-3 lg:columns-5">
         {!isRetrievingMemes &&
-          memes.map((meme) => (
+          responsiveMemes.map((meme) => (
             <MemeCard
               key={meme.id}
               meme={meme}
