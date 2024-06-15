@@ -5,7 +5,7 @@ export function sortDataToMasonry<T>(
 ) {
   const newList: T[] = [];
 
-  const rows = Math.floor(data.length / columns);
+  const rows = Math.ceil(data.length / columns);
 
   for (let i = 0; i < columns; i++) {
     for (let j = 0; j < rows; j++) {
