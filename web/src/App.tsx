@@ -189,7 +189,7 @@ export function App() {
 
   return (
     <>
-      <header className="container max-sm:px-4 mb-4">
+      <header className="container max-sm:px-4 pb-4 sticky top-0 z-10 bg-background">
         <nav
           className={cn(
             "py-4 grid grid-cols-[1fr_auto_auto] gap-4",
