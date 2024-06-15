@@ -47,8 +47,9 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
           muted
           loop
           autoPlay
+          controls={false}
           preload="none"
-          className="w-full"
+          className="w-full pointer-events-none"
           style={{ display: "none" }}
           onLoadedData={(event) => {
             fakeImageRef.current?.remove();
