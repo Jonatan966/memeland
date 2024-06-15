@@ -43,7 +43,9 @@ export const supabaseService = {
 
     const { data, count } = await supabase
       .from("memes")
-      .select("id, description, keywords, file, type", { count: "exact" })
+      .select("id, description, keywords, file, type, width, height", {
+        count: "exact",
+      })
       .eq("user_id", user_id)
       .order(order.by, { ascending: order.ascending })
       .range(from + Number(from > 0), to);
