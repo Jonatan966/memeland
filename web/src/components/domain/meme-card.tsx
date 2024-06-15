@@ -4,6 +4,7 @@ import { Button } from "../ui/button";
 import { FileIcon } from "@radix-ui/react-icons";
 import { MEME_LABELS, useMeme } from "@/hooks/use-meme";
 import { useMemo, useRef } from "react";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface MemeCardProps {
   meme: Meme;
@@ -11,6 +12,8 @@ interface MemeCardProps {
 }
 
 export function MemeCard({ meme, onSelect }: MemeCardProps) {
+  const isOnDesktop = useMediaQuery(["(max-width: 639px)"]);
+
   const memeImageRef = useRef<HTMLImageElement>(null);
   const fakeImageRef = useRef<HTMLImageElement>(null);
 
@@ -46,7 +49,7 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
           src={meme.file}
           muted
           loop
-          autoPlay
+          autoPlay={!!isOnDesktop}
           controls={false}
           preload="none"
           className="w-full pointer-events-none"
