@@ -6,6 +6,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
+import { MixerHorizontalIcon } from "@radix-ui/react-icons";
+import { useMediaQuery } from "@/hooks/use-media-query";
+import { useRef } from "react";
 
 export type OrderingType =
   | "creation_new"
@@ -19,10 +22,31 @@ interface MemesOrderSelectorProps {
 }
 
 export function MemesOrderSelector(props: MemesOrderSelectorProps) {
+  const selectRef = useRef<HTMLButtonElement>(null);
+  const isOnDesktop = useMediaQuery(["(max-width: 639px)"]);
+
+  function onValueChange(newValue: OrderingType) {
+    props.onChange(newValue);
+
+    if (!selectRef.current) {
+      return;
+    }
+
+    let colorToChange = "hsl(var(--input))";
+
+    if (newValue !== "creation_new") {
+      colorToChange = "var(--foreground)";
+    }
+
+    selectRef.current.style.borderColor = colorToChange;
+  }
+
   return (
-    <Select defaultValue={props.defaultValue} onValueChange={props.onChange}>
-      <SelectTrigger className="sm:w-64">
-        <SelectValue />
+    <Select defaultValue={props.defaultValue} onValueChange={onValueChange}>
+      <SelectTrigger className="w-auto" ref={selectRef}>
+        <MixerHorizontalIcon className="mr-1" />
+
+        {!!isOnDesktop && <SelectValue />}
       </SelectTrigger>
       <SelectContent>
         <SelectItem value="creation_new">Criação (Mais recente)</SelectItem>

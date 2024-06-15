@@ -34,16 +34,20 @@ export function MemeDetailsDialog({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="p-0 sm:grid flex flex-col grid-cols-2 w-full max-w-3xl">
         {memeFileExtension === "mp4" ? (
-          <video src={meme.file} className="h-full w-full" controls />
+          <video
+            src={meme.file}
+            className="h-full w-full max-h-[50svh]"
+            controls
+          />
         ) : (
           <img
             src={meme.file}
-            className="h-full w-full bg-black"
+            className="h-full w-full bg-black max-h-[50svh] object-contain"
             loading="lazy"
           />
         )}
 
-        <div className="p-6 flex flex-col">
+        <div className="p-6 flex flex-col max-sm:pt-0">
           <div className="mb-2">
             <strong className="text-sm font-medium leading-none">
               Descrição

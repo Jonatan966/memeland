@@ -210,7 +210,7 @@ export function App() {
           <SignOut />
         </nav>
 
-        <div className="flex gap-2 max-sm:flex-col">
+        <div className="flex gap-2">
           <Input
             placeholder="pesquise por um termo"
             onKeyDown={handleSearchMemes}
