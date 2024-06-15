@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Meme, supabase, supabaseService } from "./services/supabase";
 import { AppAuth } from "./components/domain/app-auth";
 import { Input } from "./components/ui/input";
-import { Profile } from "./components/domain/profile";
+import { SignOut } from "./components/domain/sign-out";
 import { MemeCard } from "./components/domain/meme-card";
 import { CreateMemeDialog } from "./components/domain/create-meme-dialog";
 import { MemeDetailsDialog } from "./components/domain/meme-details-dialog";
@@ -207,7 +207,7 @@ export function App() {
             session={session}
             onAfterCreate={onRequestFirstPage}
           />
-          <Profile {...{ session }} />
+          <SignOut />
         </nav>
 
         <div className="flex gap-2 max-sm:flex-col">
