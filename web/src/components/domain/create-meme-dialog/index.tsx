@@ -75,6 +75,8 @@ export function CreateMemeDialog({
       setIsDialogOpen(false);
 
       toast.success("Meme enviado com sucesso!");
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (error) {
       console.log(error);
     }
