@@ -113,9 +113,13 @@ export function CreateMemeDialog({
   return (
     <Dialog open={isDialogOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button className="h-full" style={{ gridArea: "newMeme" }}>
+        <Button
+          className="h-full"
+          style={{ gridArea: "newMeme" }}
+          title="Novo meme"
+        >
           <ImageIcon className="mr-1" />
-          Novo meme
+          Novo
         </Button>
       </DialogTrigger>
       <DialogContent>
