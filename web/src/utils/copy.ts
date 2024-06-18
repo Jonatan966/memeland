@@ -4,9 +4,20 @@ export async function copy(content: string | Blob) {
       return false;
     }
 
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    let parsedContent: Blob | Promise<Blob> = content;
+
+    if (isSafari) {
+      const makeImagePromise = async () => {
+        return new Promise<Blob>((resolve) => resolve(content));
+      };
+
+      parsedContent = makeImagePromise();
+    }
+
     await navigator.clipboard.write([
       new ClipboardItem({
-        [content.type]: content,
+        [content.type]: parsedContent,
       }),
     ]);
 
