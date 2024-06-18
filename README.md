@@ -10,7 +10,7 @@ Memeland é um site para gerenciar memes, podendo guardar, copiar e encontrar ra
 
 - [Vite](https://vite.dev/)
 - [OpenAI (GPT, Embeddings)](https://openai.com/)
-- [Cloudflare Workers](https://developers.cloudflare.com/workers)
+- [Cloudflare (Workers, KV)](https://developers.cloudflare.com/)
 - [shadcn/ui](https://ui.shadcn.com/)
 - [Supabase (Storage, Auth, Database)](https://supabase.com/)
 

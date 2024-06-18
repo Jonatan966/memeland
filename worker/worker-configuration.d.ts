@@ -2,6 +2,7 @@
 // by running `wrangler types`
 
 type Env = {
+  MEMELAND_SEARCH: KVNamespace;
   SUPABASE_STORAGE_ENDPOINT: string;
   SUPABASE_STORAGE_BASE: string;
   SUPABASE_STORAGE_ACCESS_KEY_ID: string;
