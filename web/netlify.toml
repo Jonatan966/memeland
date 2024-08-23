@@ -2,7 +2,7 @@
 command = "sed -i \"s|STORAGE_BASE|${STORAGE_BASE}|g\" netlify.toml && npm run build"
 
 [[redirects]]
-    from = "/media"
-    to = "STORAGE_BASE"
+    from = "/media/*"
+    to = "STORAGE_BASE/:splat"
     status = 200
     force = true
