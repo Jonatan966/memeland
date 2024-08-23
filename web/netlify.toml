@@ -1,0 +1,8 @@
+[build]
+command = "sed -i \"s|STORAGE_BASE|${STORAGE_BASE}|g\" netlify.toml && npm run build"
+
+[[redirects]]
+    from = "/media"
+    to = "STORAGE_BASE"
+    status = 200
+    force = true
