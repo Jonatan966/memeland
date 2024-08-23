@@ -10,4 +10,14 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  server: {
+    proxy: {
+      '/media': {
+        target: process.env.STORAGE_BASE,
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace('/media', '')
+      }
+    }
+  }
 });
