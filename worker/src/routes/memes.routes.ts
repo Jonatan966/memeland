@@ -1,6 +1,4 @@
 import { sha1 } from 'hono/utils/crypto';
-import { PutObjectCommand } from '@aws-sdk/client-s3';
-import { createStorageService } from '../services/storage';
 import { createOpenAIService } from '../services/openai';
 import { createSupabaseService } from '../services/supabase';
 import { createHonoApp } from '../libs/hono';
@@ -22,7 +20,6 @@ memesRouter.post(
 			return response;
 		}
 
-		const storageService = createStorageService(context.env);
 		const openAIService = createOpenAIService(context.env);
 		const supabaseService = createSupabaseService(context.env);
 
@@ -57,17 +54,9 @@ memesRouter.post(
 
 		const fileExtension = memeFile.name.substring(memeFile.name.lastIndexOf('.'));
 		const memeFileKey = `${user.id}/${fileHash}${fileExtension}`;
-		const targetBucketName = 'memes';
-		const memeFileUrl = `${context.env.SUPABASE_STORAGE_BASE}/${targetBucketName}/${memeFileKey}`;
-
-		await storageService.send(
-			new PutObjectCommand({
-				Bucket: targetBucketName,
-				Key: memeFileKey,
-				Body: memeFileData as any,
-				ContentType: memeFile.type,
-			})
-		);
+		const memeFileUrl = `${context.env.STORAGE_BASE}/${memeFileKey}`;
+		
+		await context.env.MEMELAND_STORAGE.put(memeFileKey, memeFileData);
 
 		const embeddingResponse = await openAIService.embeddings.create({
 			input: description,
@@ -94,7 +83,7 @@ memesRouter.get('/search', async (context) => {
 
 	if (response) {
 		return response;
-	}
+	}	
 
 	const openAIService = createOpenAIService(context.env);
 	const supabaseService = createSupabaseService(context.env);

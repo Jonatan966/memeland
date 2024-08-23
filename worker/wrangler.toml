@@ -69,7 +69,7 @@ compatibility_flags = ["nodejs_compat"]
 # Bind a KV Namespace. Use KV as persistent storage for small key-value pairs.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#kv-namespaces
 kv_namespaces = [
-  { binding = "MEMELAND_SEARCH", id = "32272ff4779d41739464587ee383cd5b" }
+  { binding = "MEMELAND_SEARCH", id = "32272ff4779d41739464587ee383cd5b", preview_id = "029e518b665c49b4888db44420020632" }
 ]
 
 # Bind an mTLS certificate. Use to present a client certificate when communicating with another service.
@@ -91,9 +91,10 @@ kv_namespaces = [
 
 # Bind an R2 Bucket. Use R2 to store arbitrarily large blobs of data, such as files.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#r2-buckets
-# [[r2_buckets]]
-# binding = "MY_BUCKET"
-# bucket_name = "my-bucket"
+[[r2_buckets]]
+binding = "MEMELAND_STORAGE"
+bucket_name = "memeland"
+preview_bucket_name = "memeland"
 
 # Bind another Worker service. Use this binding to call another Worker without network overhead.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#service-bindings
