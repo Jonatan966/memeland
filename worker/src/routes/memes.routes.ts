@@ -54,7 +54,7 @@ memesRouter.post(
 
 		const fileExtension = memeFile.name.substring(memeFile.name.lastIndexOf('.'));
 		const memeFileKey = `${user.id}/${fileHash}${fileExtension}`;
-		const memeFileUrl = `${context.env.STORAGE_BASE}/${memeFileKey}`;
+		const memeFileUrl = `/media/${memeFileKey}`;
 		
 		await context.env.MEMELAND_STORAGE.put(memeFileKey, memeFileData);
 
