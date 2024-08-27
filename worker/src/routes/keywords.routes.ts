@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { zodResponseFormat } from "openai/helpers/zod";
 import { zValidator } from "@hono/zod-validator";
 import { createHonoApp } from "../libs/hono";
 import { authMiddleware } from "../middlewares/auth.middleware";
@@ -26,19 +27,22 @@ keywordsRouter.post(
     const { description } = context.req.valid("json");
 
     const keywordsResponse = await openAIService.chat.completions.create({
-      model: "gpt-3.5-turbo-0125",
-      response_format: {
-        type: "json_object",
-      },
+      model: "gpt-4o-mini-2024-07-18",
+      response_format: zodResponseFormat(
+        z.object({
+          keywords: z.array(z.string()),
+        }),
+        "keywords"
+      ),
       messages: [
         {
           role: "system",
           content:
-            'Você receberá um bloco de texto e sua tarefa é extrair dele uma lista de palavras-chave. Responda apenas com lista de palavras-chave separadas por vírgula. Retorne um JSON no seguinte formato: ```{"keywords": ["key1", "key2", "etc"]}```',
+            'Você receberá um bloco de texto e sua tarefa é extrair dele uma lista de palavras-chave.',
         },
         {
           role: "user",
-          content: `\`\`\`${description}\`\`\``,
+          content: `\`\`\`Charli XCX mostrando o seu album BRAT\`\`\``,
         },
       ],
     });

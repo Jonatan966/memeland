@@ -18,7 +18,7 @@
 		"@hono/zod-validator": "^0.2.1",
 		"@supabase/supabase-js": "^2.42.7",
 		"hono": "^4.3.4",
-		"openai": "^4.38.5",
+		"openai": "^4.56.0",
 		"zod": "^3.23.8"
 	}
 }
