@@ -2,6 +2,7 @@
 // by running `wrangler types`
 
 type Env = {
+  AI: Ai;
   MEMELAND_SEARCH: KVNamespace;
   MEMELAND_STORAGE: R2Bucket;
   STORAGE_BASE: string;
@@ -12,4 +13,6 @@ type Env = {
   SUPABASE_PROJECT_URL: string;
   SUPABASE_ANON_KEY: string;
   OPENAI_API_KEY: string;
+  CLOUDFLARE_ACCOUNT_ID: string;
+  CLOUDFLARE_API_KEY: string;
 };
