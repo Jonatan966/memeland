@@ -21,7 +21,7 @@ memesRouter.post(
 			return response;
 		}
 
-		const openAIService = createOpenAIService(context.env);
+		const cloudflareAIService = createCloudflareAIService(context.env);
 		const supabaseService = createSupabaseService(context.env);
 
 		const formData = await context.req.formData();
@@ -59,13 +59,13 @@ memesRouter.post(
 		
 		await context.env.MEMELAND_STORAGE.put(memeFileKey, memeFileData);
 
-		const embeddingResponse = await openAIService.embeddings.create({
+		const embeddingResponse = await cloudflareAIService.embeddings.create({
 			input: description,
-			model: 'text-embedding-ada-002',
+			model: '@cf/baai/bge-base-en-v1.5',
 		});
 
 		const { error } = await supabaseService.from('memes').insert({
-			embedding: embeddingResponse.data.flatMap((item) => item.embedding),
+			new_embedding: embeddingResponse.data.flatMap((item) => item.embedding),
 			description,
 			keywords,
 			user_id: user.id,
