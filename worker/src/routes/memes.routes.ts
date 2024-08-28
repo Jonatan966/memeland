@@ -5,6 +5,7 @@ import { createHonoApp } from '../libs/hono';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { bodyLimit } from 'hono/body-limit';
 import { Embedding } from 'openai/resources/embeddings';
+import { createCloudflareAIService } from '../services/cloudflare-ai';
 
 const memesRouter = createHonoApp();
 
@@ -85,8 +86,8 @@ memesRouter.get('/search', async (context) => {
 		return response;
 	}	
 
-	const openAIService = createOpenAIService(context.env);
 	const supabaseService = createSupabaseService(context.env);
+	const cloudflareAIService = createCloudflareAIService(context.env);
 
 	const querySearch = context.req.query('q')?.trim()?.toLowerCase();
 
@@ -104,9 +105,9 @@ memesRouter.get('/search', async (context) => {
 	let queryEmbedding: Embedding[] = JSON.parse((await context.env.MEMELAND_SEARCH.get<string>(querySearch)) || 'null');
 
 	if (!queryEmbedding) {
-		const queryEmbeddingResponse = await openAIService.embeddings.create({
+		const queryEmbeddingResponse = await cloudflareAIService.embeddings.create({
 			input: querySearch,
-			model: 'text-embedding-ada-002',
+			model: '@cf/baai/bge-base-en-v1.5',
 		});
 
 		queryEmbedding = queryEmbeddingResponse.data;
@@ -116,7 +117,7 @@ memesRouter.get('/search', async (context) => {
 
 	const { data, error: queryError } = await supabaseService.rpc('search_memes', {
 		query_embedding: queryEmbedding.flatMap((item) => item.embedding),
-		similarity_threshold: 0.75,
+		similarity_threshold: 0.6,
 		match_count: 10,
 		owner_id: user.id,
 	});
