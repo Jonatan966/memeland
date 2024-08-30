@@ -42,7 +42,7 @@ keywordsRouter.post(
         },
         {
           role: "user",
-          content: `\`\`\`Charli XCX mostrando o seu album BRAT\`\`\``,
+          content: `\`\`\`${description}\`\`\``,
         },
       ],
     });
