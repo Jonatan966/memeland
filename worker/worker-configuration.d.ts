@@ -3,6 +3,7 @@
 
 type Env = {
   AI: Ai;
+  VECTORIZE: Vectorize;
   MEMELAND_SEARCH: KVNamespace;
   MEMELAND_STORAGE: R2Bucket;
   STORAGE_BASE: string;
