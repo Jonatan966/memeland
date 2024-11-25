@@ -1,11 +1,7 @@
 import { sha1 } from 'hono/utils/crypto';
-import { createOpenAIService } from '../services/openai';
-import { createSupabaseService } from '../services/supabase';
 import { createHonoApp } from '../libs/hono';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { bodyLimit } from 'hono/body-limit';
-import { Embedding } from 'openai/resources/embeddings';
-import { createCloudflareAIService } from '../services/cloudflare-ai';
 
 const memesRouter = createHonoApp();
 
@@ -20,9 +16,6 @@ memesRouter.post(
 		if (response) {
 			return response;
 		}
-
-		const cloudflareAIService = createCloudflareAIService(context.env);
-		const supabaseService = createSupabaseService(context.env);
 
 		const formData = await context.req.formData();
 
@@ -56,26 +49,30 @@ memesRouter.post(
 		const fileExtension = memeFile.name.substring(memeFile.name.lastIndexOf('.'));
 		const memeFileKey = `${user.id}/${fileHash}${fileExtension}`;
 		const memeFileUrl = `/media/${memeFileKey}`;
-		
+
 		await context.env.MEMELAND_STORAGE.put(memeFileKey, memeFileData);
 
-		const embeddingResponse = await cloudflareAIService.embeddings.create({
-			input: description,
-			model: '@cf/baai/bge-base-en-v1.5',
+		const embeddingResponse = await context.env.AI.run('@cf/baai/bge-base-en-v1.5', {
+			text: description,
 		});
 
-		const { error } = await supabaseService.from('memes').insert({
-			new_embedding: embeddingResponse.data.flatMap((item) => item.embedding),
-			description,
-			keywords,
-			user_id: user.id,
-			file: memeFileUrl,
-			type: availableMemeFileTypes[memeFile.type],
-			width: dimensions?.width,
-			height: dimensions?.height,
-		});
+		const result = await context.env.VECTORIZE.insert([
+			{
+				id: crypto.randomUUID(),
+				values: embeddingResponse.data[0],
+				metadata: {
+					description,
+					keywords,
+					user_id: user.id,
+					file: memeFileUrl,
+					type: availableMemeFileTypes[memeFile.type],
+					width: dimensions?.width,
+					height: dimensions?.height,
+				},
+			},
+		]);
 
-		return context.json({ error }, error ? 500 : 201);
+		return context.json({ id: result.mutationId }, 201);
 	}
 );
 
@@ -84,10 +81,7 @@ memesRouter.get('/search', async (context) => {
 
 	if (response) {
 		return response;
-	}	
-
-	const supabaseService = createSupabaseService(context.env);
-	const cloudflareAIService = createCloudflareAIService(context.env);
+	}
 
 	const querySearch = context.req.query('q')?.trim()?.toLowerCase();
 
@@ -102,30 +96,34 @@ memesRouter.get('/search', async (context) => {
 		);
 	}
 
-	let queryEmbedding: Embedding[] = JSON.parse((await context.env.MEMELAND_SEARCH.get<string>(querySearch)) || 'null');
+	let queryEmbedding: number[] = JSON.parse((await context.env.MEMELAND_SEARCH.get<string>(querySearch)) || 'null');
 
 	if (!queryEmbedding) {
-		const queryEmbeddingResponse = await cloudflareAIService.embeddings.create({
-			input: querySearch,
-			model: '@cf/baai/bge-base-en-v1.5',
+		const queryEmbeddingResponse = await context.env.AI.run('@cf/baai/bge-base-en-v1.5', {
+			text: querySearch,
 		});
 
-		queryEmbedding = queryEmbeddingResponse.data;
+		queryEmbedding = queryEmbeddingResponse.data[0];
 
 		await context.env.MEMELAND_SEARCH.put(querySearch, JSON.stringify(queryEmbedding));
 	}
 
-	const { data, error: queryError } = await supabaseService.rpc('search_memes', {
-		query_embedding: queryEmbedding.flatMap((item) => item.embedding),
-		similarity_threshold: 0.6,
-		match_count: 10,
-		owner_id: user.id,
+	const matches = await context.env.VECTORIZE.query(queryEmbedding, {
+		filter: {
+			user_id: { $eq: user.id },
+		},
+		topK: 10,
+		returnMetadata: 'all',
 	});
+
+	const data = matches.matches.map((match) => ({
+		id: match.id,
+		...match.metadata,
+	}));
 
 	return context.json(
 		{
 			data,
-			error: queryError,
 		},
 		200
 	);
