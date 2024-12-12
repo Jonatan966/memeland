@@ -6,6 +6,7 @@ type Env = {
   VECTORIZE: Vectorize;
   MEMELAND_SEARCH: KVNamespace;
   MEMELAND_STORAGE: R2Bucket;
+  DB: D1Database;
   STORAGE_BASE: string;
   SUPABASE_STORAGE_ENDPOINT: string;
   SUPABASE_STORAGE_BASE: string;
