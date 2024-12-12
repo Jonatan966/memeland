@@ -20,7 +20,7 @@ memesRouter.post(
 		const formData = await context.req.formData();
 
 		const description = String(formData.get('description'));
-		const keywords = JSON.parse(String(formData.get('keywords')));
+		const keywords = String(formData.get('keywords'));
 		const dimensions = JSON.parse(String(formData.get('dimensions')));
 
 		const memeFile = formData.get('meme') as File;
@@ -56,9 +56,29 @@ memesRouter.post(
 			text: description,
 		});
 
-		const result = await context.env.VECTORIZE.insert([
+		const memeId = crypto.randomUUID();
+
+		const dbResult = await context.env.DB.prepare(
+			`
+			INSERT INTO meme(id, description, keywords, user_id, file, type, width, height)
+			VALUES(?, ?, ?, ?, ?, ?, ?, ?)
+		`
+		)
+			.bind(
+				memeId,
+				description,
+				keywords,
+				user.id,
+				memeFileUrl,
+				availableMemeFileTypes[memeFile.type],
+				dimensions?.width,
+				dimensions?.height
+			)
+			.run();
+
+		const vectorResult = await context.env.VECTORIZE.insert([
 			{
-				id: crypto.randomUUID(),
+				id: memeId,
 				values: embeddingResponse.data[0],
 				metadata: {
 					description,
@@ -72,7 +92,9 @@ memesRouter.post(
 			},
 		]);
 
-		return context.json({ id: result.mutationId }, 201);
+		console.log({ dbResult, vectorResult });
+
+		return context.json({ id: memeId }, 201);
 	}
 );
 
@@ -119,6 +141,7 @@ memesRouter.get('/search', async (context) => {
 	const data = matches.matches.map((match) => ({
 		id: match.id,
 		...match.metadata,
+		keywords: JSON.parse(match.metadata!.keywords as string),
 	}));
 
 	return context.json(
