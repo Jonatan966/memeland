@@ -152,4 +152,28 @@ memesRouter.get('/search', async (context) => {
 	);
 });
 
+memesRouter.get('/', async (context) => {
+	const { response, user } = await authMiddleware(context);
+
+	if (response) {
+		return response;
+	}
+
+	const page = Number(context.req.query('page')) || 0;
+	const take = Number(context.req.query('take')) || 20;
+
+	const offset = page * take;
+
+	const [countResult, memesQueryResult] = await Promise.all([
+		context.env.DB.prepare('SELECT COUNT(*) total_memes FROM meme WHERE user_id = ?').bind(user.id).run(),
+		context.env.DB.prepare('SELECT * FROM meme WHERE user_id = ? LIMIT ? OFFSET ?').bind(user.id, take, offset).run(),
+	]);
+
+	const totalMemes = countResult.results[0].total_memes as number;
+	const memes = memesQueryResult.results.map((meme) => ({ ...meme, keywords: JSON.parse(meme.keywords as string) }));
+	const hasNextPage = offset + memes.length < totalMemes;
+
+	return context.json({ memes, count: totalMemes, hasNextPage });
+});
+
 export { memesRouter };
