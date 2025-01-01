@@ -44,6 +44,7 @@ index_name = "meme-search"
 binding = "DB"
 database_name = "memeland-db"
 database_id = "c4cf65f6-7baf-4c72-bc8f-5226e0df17f4"
+migrations_dir = "src/migrations"
 
 # Bind a dispatch namespace. Use Workers for Platforms to deploy serverless functions programmatically on behalf of your customers.
 # Docs: https://developers.cloudflare.com/workers/wrangler/configuration/#dispatch-namespace-bindings-workers-for-platforms
