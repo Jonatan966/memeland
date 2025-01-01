@@ -2,6 +2,7 @@ import { sha1 } from 'hono/utils/crypto';
 import { createHonoApp } from '../libs/hono';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { bodyLimit } from 'hono/body-limit';
+import { makeMemeRepository } from '../db/repositories/meme/meme.repository';
 
 const memesRouter = createHonoApp();
 
@@ -50,6 +51,8 @@ memesRouter.post(
 		const memeFileKey = `${user.id}/${fileHash}${fileExtension}`;
 		const memeFileUrl = `/media/${memeFileKey}`;
 
+		const memeRepository = makeMemeRepository(context.env.DB);
+
 		await context.env.MEMELAND_STORAGE.put(memeFileKey, memeFileData);
 
 		const embeddingResponse = await context.env.AI.run('@cf/baai/bge-base-en-v1.5', {
@@ -58,23 +61,16 @@ memesRouter.post(
 
 		const memeId = crypto.randomUUID();
 
-		const dbResult = await context.env.DB.prepare(
-			`
-			INSERT INTO meme(id, description, keywords, user_id, file, type, width, height)
-			VALUES(?, ?, ?, ?, ?, ?, ?, ?)
-		`
-		)
-			.bind(
-				memeId,
-				description,
-				keywords,
-				user.id,
-				memeFileUrl,
-				availableMemeFileTypes[memeFile.type],
-				dimensions?.width,
-				dimensions?.height
-			)
-			.run();
+		const dbResult = await memeRepository.create({
+			id: memeId,
+			description,
+			keywords: JSON.parse(keywords),
+			user_id: user.id,
+			file: memeFileUrl,
+			type: availableMemeFileTypes[memeFile.type],
+			width: dimensions?.width,
+			height: dimensions?.height,
+		});
 
 		const vectorResult = await context.env.VECTORIZE.insert([
 			{
@@ -164,13 +160,13 @@ memesRouter.get('/', async (context) => {
 
 	const offset = page * take;
 
-	const [countResult, memesQueryResult] = await Promise.all([
-		context.env.DB.prepare('SELECT COUNT(*) total_memes FROM meme WHERE user_id = ?').bind(user.id).run(),
-		context.env.DB.prepare('SELECT * FROM meme WHERE user_id = ? LIMIT ? OFFSET ?').bind(user.id, take, offset).run(),
+	const memeRepository = makeMemeRepository(context.env.DB);
+
+	const [totalMemes, memes] = await Promise.all([
+		memeRepository.count(user.id),
+		memeRepository.findMany({ user_id: user.id, offset, take }),
 	]);
 
-	const totalMemes = countResult.results[0].total_memes as number;
-	const memes = memesQueryResult.results.map((meme) => ({ ...meme, keywords: JSON.parse(meme.keywords as string) }));
 	const hasNextPage = offset + memes.length < totalMemes;
 
 	return context.json({ memes, count: totalMemes, hasNextPage });
