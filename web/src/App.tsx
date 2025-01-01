@@ -64,11 +64,11 @@ export function App() {
 
     const reset = pagination.currentPage === 0;
 
-    const { data: memes, count } = await supabaseService.findMemes({
-      user_id: session.user.id,
-      items_per_page: pagination.itemsPerPage,
-      current_page: pagination.currentPage,
-      order: orderingConfigs[pagination.order],
+    const { memes, count } = await workerService.listMemes({
+      userToken: session.access_token,
+      itemsPerPage: pagination.itemsPerPage,
+      currentPage: pagination.currentPage,
+      // order: orderingConfigs[pagination.order],
     });
 
     setMemes((old) => (reset ? memes : [...old, ...memes]));

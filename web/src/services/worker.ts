@@ -19,6 +19,18 @@ interface SearchMemesProps {
   userToken: string;
 }
 
+interface ListMemesProps {
+  userToken: string;
+  itemsPerPage: number;
+  currentPage?: number;
+}
+
+interface ListMemesReturn {
+  count: number;
+  hasNextPage: boolean;
+  memes: Meme[];
+}
+
 interface GenerateKeywordsReturn {
   keywords: string[];
 }
@@ -53,21 +65,18 @@ export const workerService = {
     return result;
   },
   async generateKeywords(
-    data: GenerateKeywordsProps,
+    data: GenerateKeywordsProps
   ): Promise<GenerateKeywordsReturn> {
-    const response = await fetch(
-      `${workerService.apiUrl}/keywords`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          description: data.description,
-        }),
-        headers: {
-          authorization: data.userToken,
-          "Content-Type": "application/json",
-        },
+    const response = await fetch(`${workerService.apiUrl}/keywords`, {
+      method: "POST",
+      body: JSON.stringify({
+        description: data.description,
+      }),
+      headers: {
+        authorization: data.userToken,
+        "Content-Type": "application/json",
       },
-    );
+    });
 
     const result = await response.json();
 
@@ -81,7 +90,22 @@ export const workerService = {
         headers: {
           authorization: data.userToken,
         },
-      },
+      }
+    );
+
+    const result = await response.json();
+
+    return result;
+  },
+  async listMemes(props: ListMemesProps): Promise<ListMemesReturn> {
+    const response = await fetch(
+      `${workerService.apiUrl}/memes?page=${props.currentPage}&take=${props.itemsPerPage}`,
+      {
+        method: "GET",
+        headers: {
+          authorization: props.userToken,
+        },
+      }
     );
 
     const result = await response.json();
