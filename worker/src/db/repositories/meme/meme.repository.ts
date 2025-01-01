@@ -25,7 +25,7 @@ export function makeMemeRepository(db: D1Database) {
 		async create(meme: Omit<MemeEntity, 'created_at' | 'updated_at'>): Promise<any> {
 			const result = await db
 				.prepare('INSERT INTO meme(id, description, keywords, user_id, file, type, width, height) VALUES(?, ?, ?, ?, ?, ?, ?, ?)')
-				.bind(meme.id, meme.description, meme.keywords, meme.user_id, meme.file, meme.type, meme.width, meme.height)
+				.bind(meme.id, meme.description, JSON.stringify(meme.keywords), meme.user_id, meme.file, meme.type, meme.width, meme.height)
 				.run();
 
 			return result;
