@@ -10,7 +10,7 @@ import { Session } from "@supabase/supabase-js";
 import { SunIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
 
-import { Meme, supabase, supabaseService } from "./services/supabase";
+import { Meme, supabase } from "./services/supabase";
 import { AppAuth } from "./components/domain/app-auth";
 import { Input } from "./components/ui/input";
 import { SignOut } from "./components/domain/sign-out";
@@ -28,7 +28,6 @@ import { sortDataToMasonry } from "./utils/sort-data-to-masonry";
 import {
   MemesOrderSelector,
   OrderingType,
-  orderingConfigs,
 } from "./components/domain/memes-order-selector";
 
 export function App() {
