@@ -77,7 +77,7 @@ authRouter.post(
 		const parsedRefreshToken = body.refreshToken.replace('Bearer ', '');
 
 		const [jwtResult] = await Promise.allSettled([
-			jose.jwtDecrypt(parsedRefreshToken, new TextEncoder().encode(context.env.JWT_REFRESH_SECRET)),
+			jose.jwtVerify(parsedRefreshToken, new TextEncoder().encode(context.env.JWT_REFRESH_SECRET)),
 		]);
 
 		if (jwtResult.status === 'rejected' || !jwtResult.value?.payload?.jti) {
