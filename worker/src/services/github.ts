@@ -22,6 +22,7 @@ export function createGithubService(envs: Env) {
 				headers: {
 					Accept: 'application/json',
 					'Content-Type': 'application/json',
+					'User-Agent': 'memeland',
 				},
 			});
 
@@ -34,6 +35,7 @@ export function createGithubService(envs: Env) {
 				method: 'GET',
 				headers: {
 					Authorization: `Bearer ${access_token}`,
+					'User-Agent': 'memeland',
 				},
 			});
 
