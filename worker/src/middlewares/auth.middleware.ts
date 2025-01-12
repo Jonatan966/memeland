@@ -1,33 +1,30 @@
-import { Context } from "hono";
-import { createSupabaseService } from "../services/supabase";
-import { HonoEnv } from "../libs/hono";
+import { Context } from 'hono';
+import * as jose from 'jose';
+import { HonoEnv } from '../libs/hono';
 
 export async function authMiddleware(context: Context<HonoEnv>) {
-  const authorization = context.req.header("authorization");
+	const tokenPrefix = 'Bearer ';
+	const rawToken = context.req.header('authorization');
+	const parsedToken = rawToken?.replace(tokenPrefix, '')!;
 
-  if (!authorization) {
-    return {
-      response: context.json({
-        error: {
-          message: "Authorization token is required",
-        },
-      }, 401),
-    };
-  }
+	const [jwtResult] = await Promise.allSettled([jose.jwtDecrypt(parsedToken, new TextEncoder().encode(context.env.JWT_SECRET))]);
 
-  const supabaseService = createSupabaseService(context.env);
+	if (jwtResult.status === 'rejected' || !rawToken?.includes(tokenPrefix)) {
+		return {
+			response: context.json(
+				{
+					error: {
+						message: 'Token is not valid',
+					},
+				},
+				401
+			),
+		};
+	}
 
-  const userResponse = await supabaseService.auth.getUser(authorization);
-
-  if (userResponse.error || !userResponse?.data?.user?.id) {
-    return {
-      response: context.json({
-        error: {
-          message: "Token is not valid",
-        },
-      }, 401),
-    };
-  }
-
-  return { user: userResponse.data.user };
+	return {
+		account: {
+			id: jwtResult.value.payload.sub,
+		},
+	};
 }
