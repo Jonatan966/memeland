@@ -1,5 +1,10 @@
 import { FileDimensions } from "@/utils/get-file-dimensions";
+import Cookies from "js-cookie";
 import { Meme } from "./supabase";
+
+export interface User {
+  id: string;
+}
 
 interface SendMemeProps {
   description: string;
@@ -42,6 +47,67 @@ interface SearchMemesReturn {
   };
 }
 
+interface AuthenticationResult {
+  token: {
+    data: string;
+    expiresIn: number;
+  };
+  refreshToken: {
+    data: string;
+    expiresIn: number;
+  };
+}
+
+const auth = {
+  tokenKey: "@memeland:token",
+  refreshTokenKey: "@memeland:refresh-token",
+  isRefreshing: false,
+  queue: [] as ((token: string) => void)[],
+  saveTokens(tokens: AuthenticationResult) {
+    const now = Date.now();
+
+    Cookies.set(auth.tokenKey, tokens.token.data, {
+      expires: new Date(now + tokens.token.expiresIn),
+    });
+
+    Cookies.set(auth.refreshTokenKey, tokens.refreshToken.data, {
+      expires: new Date(now + tokens.refreshToken.expiresIn),
+    });
+  },
+  async getToken(): Promise<string> {
+    if (auth.isRefreshing) {
+      return new Promise((resolve) => {
+        auth.queue.push(resolve);
+      });
+    }
+
+    const token = Cookies.get(auth.tokenKey);
+
+    if (token) {
+      return token;
+    }
+
+    const refreshToken = Cookies.get(auth.refreshTokenKey);
+
+    if (!refreshToken) {
+      // TODO: Deal with possible errors
+      return "";
+    }
+
+    auth.isRefreshing = true;
+
+    const newTokens = await workerService.refreshTokens(refreshToken);
+
+    auth.saveTokens(newTokens);
+
+    auth.queue.forEach((item) => item(newTokens.token.data));
+
+    auth.isRefreshing = false;
+
+    return `Bearer ${newTokens.token.data}`;
+  },
+};
+
 export const workerService = {
   apiUrl: import.meta.env.VITE_WORKER_URL,
   async sendMeme(data: SendMemeProps) {
@@ -56,7 +122,7 @@ export const workerService = {
       method: "POST",
       body: formData,
       headers: {
-        authorization: data.userToken,
+        authorization: await auth.getToken(),
       },
     });
 
@@ -73,7 +139,7 @@ export const workerService = {
         description: data.description,
       }),
       headers: {
-        authorization: data.userToken,
+        authorization: await auth.getToken(),
         "Content-Type": "application/json",
       },
     });
@@ -88,7 +154,7 @@ export const workerService = {
       {
         method: "GET",
         headers: {
-          authorization: data.userToken,
+          authorization: await auth.getToken(),
         },
       }
     );
@@ -103,10 +169,54 @@ export const workerService = {
       {
         method: "GET",
         headers: {
-          authorization: props.userToken,
+          authorization: await auth.getToken(),
         },
       }
     );
+
+    const result = await response.json();
+
+    return result;
+  },
+  async authenticate(code: string): Promise<void> {
+    const response = await fetch(`${workerService.apiUrl}/auth`, {
+      method: "POST",
+      body: JSON.stringify({ code }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await response.json();
+
+    auth.saveTokens(result);
+  },
+  async refreshTokens(refreshToken: string): Promise<AuthenticationResult> {
+    const response = await fetch(`${workerService.apiUrl}/auth/refresh`, {
+      method: "POST",
+      body: JSON.stringify({ refreshToken }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+
+    const result = await response.json();
+
+    return result;
+  },
+  async getUserInfo(): Promise<User | undefined> {
+    const token = await auth.getToken();
+
+    if (!token) {
+      return;
+    }
+
+    const response = await fetch("${workerService.apiUrl}/auth/me", {
+      method: "GET",
+      headers: {
+        authorization: token,
+      },
+    });
 
     const result = await response.json();
 
