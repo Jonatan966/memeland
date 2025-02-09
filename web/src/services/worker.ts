@@ -10,22 +10,18 @@ interface SendMemeProps {
   description: string;
   keywords: string[];
   meme: File;
-  userToken: string;
   dimensions?: FileDimensions;
 }
 
 interface GenerateKeywordsProps {
   description: string;
-  userToken: string;
 }
 
 interface SearchMemesProps {
   query: string;
-  userToken: string;
 }
 
 interface ListMemesProps {
-  userToken: string;
   itemsPerPage: number;
   currentPage?: number;
 }
