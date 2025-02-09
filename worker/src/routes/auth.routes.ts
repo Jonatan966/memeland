@@ -6,6 +6,7 @@ import ms from 'ms';
 import { createGithubService } from '../services/github';
 import { makeAccountRepository } from '../db/repositories/account/account.repository';
 import { makeSessionRepository } from '../db/repositories/session/session.repository';
+import { authMiddleware } from '../middlewares/auth.middleware';
 
 const authRouter = createHonoApp();
 
@@ -132,5 +133,15 @@ authRouter.post(
 		});
 	}
 );
+
+authRouter.get('/me', async (context) => {
+	const { response, account } = await authMiddleware(context);
+
+	if (response) {
+		return response;
+	}
+
+	return context.json({ id: account.id });
+});
 
 export { authRouter };
