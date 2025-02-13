@@ -80,7 +80,7 @@ const auth = {
     const token = Cookies.get(auth.tokenKey);
 
     if (token) {
-      return token;
+      return `Bearer ${token}`;
     }
 
     const refreshToken = Cookies.get(auth.refreshTokenKey);
@@ -207,7 +207,7 @@ export const workerService = {
       return;
     }
 
-    const response = await fetch("${workerService.apiUrl}/auth/me", {
+    const response = await fetch(`${workerService.apiUrl}/auth/me`, {
       method: "GET",
       headers: {
         authorization: token,
