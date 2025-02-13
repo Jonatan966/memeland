@@ -1,0 +1,2 @@
+-- Migration number: 0003 	 2025-02-13T02:01:09.578Z
+ALTER TABLE meme ADD COLUMN frequency INTEGER DEFAULT 0;
