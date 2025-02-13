@@ -172,4 +172,23 @@ memesRouter.get('/', async (context) => {
 	return context.json({ memes, count: totalMemes, hasNextPage });
 });
 
+memesRouter.put('/:meme_id/frequency', async (context) => {
+	const { response, account } = await authMiddleware(context);
+
+	if (response) {
+		return response;
+	}
+
+	const { meme_id } = context.req.param();
+
+	const memeRepository = makeMemeRepository(context.env.DB);
+
+	await memeRepository.incrementFrequency({
+		meme_id,
+		user_id: account.id!,
+	});
+
+	return context.status(200);
+});
+
 export { memesRouter };

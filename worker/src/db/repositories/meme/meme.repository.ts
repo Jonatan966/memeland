@@ -7,6 +7,11 @@ interface FindManyOpt {
 	offset: number;
 }
 
+interface IncrementFrequencyOpt {
+	user_id: string;
+	meme_id: string;
+}
+
 export function makeMemeRepository(db: D1Database) {
 	return {
 		async count(user_id: string): Promise<number> {
@@ -29,6 +34,14 @@ export function makeMemeRepository(db: D1Database) {
 				.run();
 
 			return result;
+		},
+		async incrementFrequency({ meme_id, user_id }: IncrementFrequencyOpt): Promise<boolean> {
+			const result = await db
+				.prepare('UPDATE meme SET frequency = frequency + 1 WHERE id = ? AND user_id = ?')
+				.bind(meme_id, user_id)
+				.run();
+
+			return result.success;
 		},
 	};
 }
