@@ -55,8 +55,8 @@ interface AuthenticationResult {
 }
 
 const auth = {
-  tokenKey: "@memeland:token",
-  refreshTokenKey: "@memeland:refresh-token",
+  tokenKey: "memeland-token",
+  refreshTokenKey: "memeland-refresh-token",
   isRefreshing: false,
   queue: [] as ((token: string) => void)[],
   saveTokens(tokens: AuthenticationResult) {
