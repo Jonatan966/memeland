@@ -8,7 +8,8 @@
 		"start": "wrangler dev",
 		"cf-typegen": "wrangler types",
 		"db:migration-new": "wrangler d1 migrations create memeland-db",
-		"db:migration-apply": "wrangler d1 migrations apply memeland-db --remote"
+		"db:migration-apply": "wrangler d1 migrations apply memeland-db --remote",
+		"db:migration-apply-local": "wrangler d1 migrations apply memeland-db"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20240423.0",
