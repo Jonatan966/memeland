@@ -1,4 +1,4 @@
-import { User, workerService } from "@/services/worker";
+import { auth, User, workerService } from "@/services/worker";
 import { createContext, ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { SunIcon, GitHubLogoIcon } from "@radix-ui/react-icons";
@@ -8,15 +8,23 @@ import { setUrlSearchParams } from "@/utils/set-url-search-params";
 
 interface AuthContextProps {
   user?: User;
+  signOut(): void;
 }
 
-const AuthContext = createContext({} as AuthContextProps);
+export const AuthContext = createContext({} as AuthContextProps);
 
 const searchParams = new URLSearchParams(window.location.search);
 
 export function AuthProvider(props: { children: ReactNode }) {
   const [isLoadingSession, setIsLoadingSession] = useState(true);
   const [user, setUser] = useState<User>();
+
+  function signOut() {
+    // TODO: Clear session via API
+
+    auth.clearTokens();
+    setUser(undefined);
+  }
 
   useEffect(() => {
     async function processAuth() {
@@ -68,6 +76,7 @@ export function AuthProvider(props: { children: ReactNode }) {
     <AuthContext.Provider
       value={{
         user,
+        signOut,
       }}
     >
       {props.children}
