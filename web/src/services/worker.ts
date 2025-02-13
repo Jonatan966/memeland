@@ -54,7 +54,7 @@ interface AuthenticationResult {
   };
 }
 
-const auth = {
+export const auth = {
   tokenKey: "memeland-token",
   refreshTokenKey: "memeland-refresh-token",
   isRefreshing: false,
@@ -101,6 +101,10 @@ const auth = {
     auth.isRefreshing = false;
 
     return `Bearer ${newTokens.token.data}`;
+  },
+  clearTokens() {
+    Cookies.remove(auth.tokenKey);
+    Cookies.remove(auth.refreshTokenKey);
   },
 };
 
