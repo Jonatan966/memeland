@@ -174,6 +174,14 @@ export const workerService = {
 
     return result;
   },
+  async incrementMemeFrequency(memeId: string) {
+    await fetch(`${workerService.apiUrl}/memes/${memeId}/frequency`, {
+      method: "PUT",
+      headers: {
+        authorization: await auth.getToken(),
+      },
+    });
+  },
   async authenticate(code: string): Promise<void> {
     const response = await fetch(`${workerService.apiUrl}/auth`, {
       method: "POST",
