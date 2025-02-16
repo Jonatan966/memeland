@@ -12,7 +12,7 @@ memesRouter.post(
 		maxSize: 1024 * 1600, // 1.6MB
 	}),
 	async (context) => {
-		const { response, user } = await authMiddleware(context);
+		const { response, account } = await authMiddleware(context);
 
 		if (response) {
 			return response;
@@ -48,7 +48,7 @@ memesRouter.post(
 		}
 
 		const fileExtension = memeFile.name.substring(memeFile.name.lastIndexOf('.'));
-		const memeFileKey = `${user.id}/${fileHash}${fileExtension}`;
+		const memeFileKey = `${account.id}/${fileHash}${fileExtension}`;
 		const memeFileUrl = `/media/${memeFileKey}`;
 
 		const memeRepository = makeMemeRepository(context.env.DB);
@@ -65,7 +65,7 @@ memesRouter.post(
 			id: memeId,
 			description,
 			keywords: JSON.parse(keywords),
-			user_id: user.id,
+			account_id: account.id,
 			file: memeFileUrl,
 			type: availableMemeFileTypes[memeFile.type],
 			width: dimensions?.width,
@@ -79,7 +79,7 @@ memesRouter.post(
 				metadata: {
 					description,
 					keywords,
-					user_id: user.id,
+					user_id: account.id!,
 					file: memeFileUrl,
 					type: availableMemeFileTypes[memeFile.type],
 					width: dimensions?.width,
@@ -95,7 +95,7 @@ memesRouter.post(
 );
 
 memesRouter.get('/search', async (context) => {
-	const { response, user } = await authMiddleware(context);
+	const { response, account } = await authMiddleware(context);
 
 	if (response) {
 		return response;
@@ -128,7 +128,7 @@ memesRouter.get('/search', async (context) => {
 
 	const matches = await context.env.VECTORIZE.query(queryEmbedding, {
 		filter: {
-			user_id: { $eq: user.id },
+			user_id: { $eq: account.id },
 		},
 		topK: 10,
 		returnMetadata: 'all',
@@ -149,7 +149,7 @@ memesRouter.get('/search', async (context) => {
 });
 
 memesRouter.get('/', async (context) => {
-	const { response, user } = await authMiddleware(context);
+	const { response, account } = await authMiddleware(context);
 
 	if (response) {
 		return response;
@@ -163,13 +163,32 @@ memesRouter.get('/', async (context) => {
 	const memeRepository = makeMemeRepository(context.env.DB);
 
 	const [totalMemes, memes] = await Promise.all([
-		memeRepository.count(user.id),
-		memeRepository.findMany({ user_id: user.id, offset, take }),
+		memeRepository.count(account.id!),
+		memeRepository.findMany({ account_id: account.id!, offset, take }),
 	]);
 
 	const hasNextPage = offset + memes.length < totalMemes;
 
 	return context.json({ memes, count: totalMemes, hasNextPage });
+});
+
+memesRouter.put('/:meme_id/frequency', async (context) => {
+	const { response, account } = await authMiddleware(context);
+
+	if (response) {
+		return response;
+	}
+
+	const { meme_id } = context.req.param();
+
+	const memeRepository = makeMemeRepository(context.env.DB);
+
+	await memeRepository.incrementFrequency({
+		meme_id,
+		account_id: account.id!,
+	});
+
+	return context.status(200);
 });
 
 export { memesRouter };

@@ -23,14 +23,12 @@ import { useForm } from "react-hook-form";
 import { Input } from "../../ui/input";
 import { KeywordSelector } from "./keyword-selector";
 import { workerService } from "@/services/worker";
-import { Session } from "@supabase/supabase-js";
 import { useState } from "react";
 import { ImageIcon, SunIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
 import { getFileDimensions } from "@/utils/get-file-dimensions";
 
 interface CreateMemeDialogProps {
-  session: Session;
   onAfterCreate(): void;
 }
 
@@ -40,10 +38,7 @@ interface CreateMemeDTO {
   keywords: string[];
 }
 
-export function CreateMemeDialog({
-  session,
-  onAfterCreate,
-}: CreateMemeDialogProps) {
+export function CreateMemeDialog({ onAfterCreate }: CreateMemeDialogProps) {
   const form = useForm<CreateMemeDTO>();
   const [isSendingMeme, setIsSendingMeme] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -68,7 +63,6 @@ export function CreateMemeDialog({
 
       await workerService.sendMeme({
         ...data,
-        userToken: session.access_token,
         dimensions: fileDimensions,
       });
 
@@ -98,7 +92,6 @@ export function CreateMemeDialog({
 
     const { keywords: newKeywords } = await workerService.generateKeywords({
       description,
-      userToken: session.access_token,
     });
 
     form.setValue("keywords", [...new Set([...oldKeywords, ...newKeywords])]);

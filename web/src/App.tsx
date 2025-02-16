@@ -6,12 +6,9 @@ import {
   useRef,
   useMemo,
 } from "react";
-import { Session } from "@supabase/supabase-js";
 import { SunIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
 
-import { Meme, supabase } from "./services/supabase";
-import { AppAuth } from "./components/domain/app-auth";
 import { Input } from "./components/ui/input";
 import { SignOut } from "./components/domain/sign-out";
 import { MemeCard } from "./components/domain/meme-card";
@@ -20,7 +17,7 @@ import { MemeDetailsDialog } from "./components/domain/meme-details-dialog";
 
 import { cn } from "./lib/utils";
 import customStyles from "./custom.module.css";
-import { workerService } from "./services/worker";
+import { workerService, Meme } from "./services/worker";
 import { Button } from "./components/ui/button";
 import { useDebounce } from "./hooks/use-debounce";
 import { useMediaQuery } from "./hooks/use-media-query";
@@ -32,9 +29,6 @@ import {
 
 export function App() {
   const navigationButtonRef = useRef<HTMLButtonElement>(null);
-
-  const [isLoadingSession, setIsLoadingSession] = useState(true);
-  const [session, setSession] = useState<Session | null>(null);
 
   const [pagination, setPagination] = useState({
     itemsPerPage: 20,
@@ -57,14 +51,9 @@ export function App() {
   const hasNextPage = memes.length < totalMemes;
 
   const onFetchMemes = useCallback(async () => {
-    if (!session?.user?.id) {
-      return;
-    }
-
     const reset = pagination.currentPage === 0;
 
     const { memes, count } = await workerService.listMemes({
-      userToken: session.access_token,
       itemsPerPage: pagination.itemsPerPage,
       currentPage: pagination.currentPage,
       // order: orderingConfigs[pagination.order],
@@ -72,7 +61,7 @@ export function App() {
 
     setMemes((old) => (reset ? memes : [...old, ...memes]));
     setTotalMemes(count);
-  }, [session?.user?.id, pagination]);
+  }, [pagination]);
 
   const responsiveMemes = useMemo(() => {
     const cols = (responsiveColsIndex < 0 ? 4 : responsiveColsIndex) + 1;
@@ -109,7 +98,7 @@ export function App() {
   async function handleSearchMemes(event: KeyboardEvent<HTMLInputElement>) {
     const query = event.currentTarget.value.trim();
 
-    if (event.key !== "Enter" || !session?.access_token) {
+    if (event.key !== "Enter") {
       return;
     }
 
@@ -118,7 +107,6 @@ export function App() {
     try {
       if (query) {
         const memesResult = await workerService.searchMemes({
-          userToken: session.access_token,
           query,
         });
 
@@ -134,25 +122,6 @@ export function App() {
 
     setIsRetrievingMemes(false);
   }
-
-  useEffect(() => {
-    function onLoginSuccess(session: Session | null) {
-      setSession(session);
-      setTimeout(() => setIsLoadingSession(false), 500);
-    }
-
-    supabase.auth
-      .getSession()
-      .then(({ data: { session } }) => onLoginSuccess(session));
-
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) =>
-      onLoginSuccess(session)
-    );
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   useEffect(() => {
     onFetchMemes();
@@ -173,19 +142,6 @@ export function App() {
     return () => window.removeEventListener("scroll", handleInfiniteScroll);
   }, []);
 
-  if (isLoadingSession) {
-    return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <SunIcon className="animate-spin w-8 h-8" />
-        <strong>Carregando sessão...</strong>
-      </div>
-    );
-  }
-
-  if (!session) {
-    return <AppAuth />;
-  }
-
   return (
     <>
       <header className="container max-sm:px-4 pb-4 sticky top-0 z-10 bg-background">
@@ -202,10 +158,7 @@ export function App() {
             🐸 memeland
           </h1>
 
-          <CreateMemeDialog
-            session={session}
-            onAfterCreate={onRequestFirstPage}
-          />
+          <CreateMemeDialog onAfterCreate={onRequestFirstPage} />
           <SignOut />
         </nav>
 

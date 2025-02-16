@@ -8,10 +8,12 @@
 		"start": "wrangler dev",
 		"cf-typegen": "wrangler types",
 		"db:migration-new": "wrangler d1 migrations create memeland-db",
-		"db:migration-apply": "wrangler d1 migrations apply memeland-db"
+		"db:migration-apply": "wrangler d1 migrations apply memeland-db --remote",
+		"db:migration-apply-local": "wrangler d1 migrations apply memeland-db"
 	},
 	"devDependencies": {
 		"@cloudflare/workers-types": "^4.20240423.0",
+		"@types/ms": "^0.7.34",
 		"typescript": "^5.0.4",
 		"wrangler": "^3.90.0"
 	},
@@ -20,6 +22,8 @@
 		"@hono/zod-validator": "^0.2.1",
 		"@supabase/supabase-js": "^2.42.7",
 		"hono": "^4.3.4",
+		"jose": "^5.9.6",
+		"ms": "^2.1.3",
 		"openai": "^4.56.0",
 		"zod": "^3.23.8"
 	}
