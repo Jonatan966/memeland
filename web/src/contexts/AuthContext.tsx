@@ -41,10 +41,10 @@ export function AuthProvider(props: { children: ReactNode }) {
       } catch (error) {
         console.log(error);
         toast.error("Não foi possível fazer login no momento :(");
-
-        const newUrl = setUrlSearchParams(window.location.href, {});
-        window.history.pushState({ path: newUrl }, "", newUrl);
       }
+
+      const newUrl = setUrlSearchParams(window.location.href, {});
+      window.history.pushState({ path: newUrl }, "", newUrl);
 
       setIsLoadingSession(false);
     }
