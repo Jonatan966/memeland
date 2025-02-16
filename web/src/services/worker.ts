@@ -92,7 +92,9 @@ export const auth = {
 
     auth.isRefreshing = true;
 
-    const newTokens = await workerService.refreshTokens(refreshToken);
+    const newTokens = await workerService.refreshTokens(
+      `Bearer ${refreshToken}`
+    );
 
     auth.saveTokens(newTokens);
 
