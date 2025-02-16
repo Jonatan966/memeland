@@ -6,11 +6,9 @@ import {
   useRef,
   useMemo,
 } from "react";
-import { Session } from "@supabase/supabase-js";
 import { SunIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
 
-import { Meme } from "./services/supabase";
 import { Input } from "./components/ui/input";
 import { SignOut } from "./components/domain/sign-out";
 import { MemeCard } from "./components/domain/meme-card";
@@ -19,7 +17,7 @@ import { MemeDetailsDialog } from "./components/domain/meme-details-dialog";
 
 import { cn } from "./lib/utils";
 import customStyles from "./custom.module.css";
-import { workerService } from "./services/worker";
+import { workerService, Meme } from "./services/worker";
 import { Button } from "./components/ui/button";
 import { useDebounce } from "./hooks/use-debounce";
 import { useMediaQuery } from "./hooks/use-media-query";
@@ -31,8 +29,6 @@ import {
 
 export function App() {
   const navigationButtonRef = useRef<HTMLButtonElement>(null);
-
-  const [session] = useState<Session | null>(null);
 
   const [pagination, setPagination] = useState({
     itemsPerPage: 20,
@@ -55,10 +51,6 @@ export function App() {
   const hasNextPage = memes.length < totalMemes;
 
   const onFetchMemes = useCallback(async () => {
-    if (!session?.user?.id) {
-      return;
-    }
-
     const reset = pagination.currentPage === 0;
 
     const { memes, count } = await workerService.listMemes({
@@ -69,7 +61,7 @@ export function App() {
 
     setMemes((old) => (reset ? memes : [...old, ...memes]));
     setTotalMemes(count);
-  }, [session?.user?.id, pagination]);
+  }, [pagination]);
 
   const responsiveMemes = useMemo(() => {
     const cols = (responsiveColsIndex < 0 ? 4 : responsiveColsIndex) + 1;
@@ -106,7 +98,7 @@ export function App() {
   async function handleSearchMemes(event: KeyboardEvent<HTMLInputElement>) {
     const query = event.currentTarget.value.trim();
 
-    if (event.key !== "Enter" || !session?.access_token) {
+    if (event.key !== "Enter") {
       return;
     }
 

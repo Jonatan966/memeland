@@ -1,4 +1,4 @@
-import { MemeOrderingConfig } from "@/services/supabase";
+import { MemeOrderingConfig } from "@/services/worker";
 import {
   Select,
   SelectContent,

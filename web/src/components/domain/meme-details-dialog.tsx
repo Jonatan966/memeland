@@ -1,4 +1,4 @@
-import { Meme } from "@/services/supabase";
+import { Meme } from "@/services/worker";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";

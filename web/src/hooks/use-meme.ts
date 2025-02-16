@@ -1,5 +1,4 @@
-import { Meme } from "@/services/supabase";
-import { workerService } from "@/services/worker";
+import { workerService, Meme } from "@/services/worker";
 import { convertImageToBlob } from "@/utils/convert-image-to-blob";
 import { copy } from "@/utils/copy";
 import { getFileExtension } from "@/utils/get-file-extension";
