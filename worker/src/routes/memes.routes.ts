@@ -65,7 +65,7 @@ memesRouter.post(
 			id: memeId,
 			description,
 			keywords: JSON.parse(keywords),
-			user_id: account.id,
+			account_id: account.id,
 			file: memeFileUrl,
 			type: availableMemeFileTypes[memeFile.type],
 			width: dimensions?.width,
@@ -164,7 +164,7 @@ memesRouter.get('/', async (context) => {
 
 	const [totalMemes, memes] = await Promise.all([
 		memeRepository.count(account.id!),
-		memeRepository.findMany({ user_id: account.id!, offset, take }),
+		memeRepository.findMany({ account_id: account.id!, offset, take }),
 	]);
 
 	const hasNextPage = offset + memes.length < totalMemes;
@@ -185,7 +185,7 @@ memesRouter.put('/:meme_id/frequency', async (context) => {
 
 	await memeRepository.incrementFrequency({
 		meme_id,
-		user_id: account.id!,
+		account_id: account.id!,
 	});
 
 	return context.status(200);

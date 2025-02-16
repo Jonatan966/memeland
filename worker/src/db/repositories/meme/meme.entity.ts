@@ -2,7 +2,7 @@ export interface MemeEntity {
 	id: string;
 	description: string;
 	keywords?: string[];
-	user_id?: string;
+	account_id?: string;
 	frequency?: number;
 	file?: string;
 	type?: string;
