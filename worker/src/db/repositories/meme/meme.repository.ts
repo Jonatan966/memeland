@@ -27,6 +27,12 @@ export function makeMemeRepository(db: D1Database) {
 
 			return memes;
 		},
+		async findById(id: string): Promise<MemeEntity> {
+			const result = await db.prepare('SELECT * FROM meme WHERE id = ?').bind(id).run();
+			const meme = result.results[0];
+
+			return { ...meme, keywords: JSON.parse(meme.keywords as string) } as MemeEntity;
+		},
 		async create(meme: Omit<MemeEntity, 'created_at' | 'updated_at'>): Promise<any> {
 			const result = await db
 				.prepare('INSERT INTO meme(id, description, keywords, account_id, file, type) VALUES(?, ?, ?, ?, ?, ?)')
