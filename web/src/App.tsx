@@ -138,13 +138,11 @@ export function App() {
             🐸 memeland
           </h1>
 
-          {user ? (
+          {user && (
             <>
               <CreateMemeDialog onAfterCreate={onRequestFirstPage} />
               <SignOut />
             </>
-          ) : (
-            <SignIn />
           )}
         </nav>
 
@@ -200,6 +198,12 @@ export function App() {
         isOpen={isMemeDialogOpen}
         onClose={() => setIsMemeDialogOpen(false)}
       />
+
+      {!user && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <SignIn />
+        </div>
+      )}
     </>
   );
 }
