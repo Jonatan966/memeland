@@ -1,11 +1,4 @@
-import {
-  useState,
-  useEffect,
-  KeyboardEvent,
-  useCallback,
-  useRef,
-  useMemo,
-} from "react";
+import { useState, useEffect, KeyboardEvent, useCallback, useRef } from "react";
 import { SunIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
 
@@ -20,8 +13,6 @@ import customStyles from "./custom.module.css";
 import { workerService, Meme } from "./services/worker";
 import { Button } from "./components/ui/button";
 import { useDebounce } from "./hooks/use-debounce";
-import { useMediaQuery } from "./hooks/use-media-query";
-import { sortDataToMasonry } from "./utils/sort-data-to-masonry";
 import {
   MemesOrderSelector,
   OrderingType,
@@ -31,7 +22,7 @@ export function App() {
   const navigationButtonRef = useRef<HTMLButtonElement>(null);
 
   const [pagination, setPagination] = useState({
-    itemsPerPage: 20,
+    itemsPerPage: 25,
     currentPage: 0,
     order: "creation_new" as OrderingType,
   });
@@ -41,12 +32,6 @@ export function App() {
 
   const [selectedMeme, setSelectedMeme] = useState<Meme | null>(null);
   const [isMemeDialogOpen, setIsMemeDialogOpen] = useState(false);
-
-  const responsiveColsIndex = useMediaQuery([
-    "(max-width: 639px)",
-    "(max-width: 767px)",
-    "(max-width: 1023px)",
-  ]);
 
   const hasNextPage = memes.length < totalMemes;
 
@@ -62,22 +47,6 @@ export function App() {
     setMemes((old) => (reset ? memes : [...old, ...memes]));
     setTotalMemes(count);
   }, [pagination]);
-
-  const responsiveMemes = useMemo(() => {
-    const cols = (responsiveColsIndex < 0 ? 4 : responsiveColsIndex) + 1;
-
-    const mountDummyMeme = () =>
-      ({
-        id: crypto.randomUUID(),
-        isDummy: true,
-      } as Meme);
-
-    return sortDataToMasonry(
-      memes.map((m, i) => ({ ...m, index: i })),
-      cols,
-      mountDummyMeme
-    );
-  }, [memes, responsiveColsIndex]);
 
   const debounceRequestNextPage = useDebounce(
     () => navigationButtonRef?.current?.click(),
@@ -185,9 +154,9 @@ export function App() {
         <SunIcon className="animate-spin w-8 h-8 mx-auto" />
       )}
 
-      <main className="container max-sm:px-4 columns-1 sm:columns-2 md:columns-3 lg:columns-5">
+      <main className="container max-sm:px-4 grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
         {!isRetrievingMemes &&
-          responsiveMemes.map((meme) => (
+          memes.map((meme) => (
             <MemeCard
               key={meme.id}
               meme={meme}
