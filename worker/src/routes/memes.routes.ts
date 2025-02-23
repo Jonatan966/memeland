@@ -3,6 +3,8 @@ import { createHonoApp } from '../libs/hono';
 import { authMiddleware } from '../middlewares/auth.middleware';
 import { bodyLimit } from 'hono/body-limit';
 import { makeMemeRepository } from '../db/repositories/meme/meme.repository';
+import { zValidator } from '@hono/zod-validator';
+import { z } from 'zod';
 
 const memesRouter = createHonoApp();
 
@@ -184,6 +186,36 @@ memesRouter.put('/:meme_id/frequency', async (context) => {
 	});
 
 	return context.status(200);
+});
+
+memesRouter.post('/vector', zValidator('json', z.array(z.object({ id: z.string(), vectors: z.array(z.number()) }))), async (context) => {
+	const memes = context.req.valid('json');
+
+	const memeRepository = makeMemeRepository(context.env.DB);
+
+	const payload = [] as VectorizeVector[];
+
+	for (const basicMeme of memes) {
+		await new Promise((resolve) => setTimeout(resolve, 200));
+
+		const meme = await memeRepository.findById(basicMeme.id);
+
+		payload.push({
+			id: basicMeme.id,
+			values: basicMeme.vectors,
+			metadata: {
+				description: meme.description,
+				keywords: JSON.stringify(meme.keywords),
+				user_id: meme.account_id!,
+				file: meme.file!,
+				type: meme.type!,
+			},
+		});
+	}
+
+	const vectorResult = await context.env.VECTORIZE.insert(payload);
+
+	return context.json(vectorResult);
 });
 
 export { memesRouter };
