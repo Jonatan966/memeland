@@ -1,0 +1,4 @@
+-- Migration number: 0004 	 2025-02-23T01:20:04.418Z
+
+ALTER TABLE meme DROP COLUMN width;
+ALTER TABLE meme DROP COLUMN height;

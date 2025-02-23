@@ -6,8 +6,6 @@ export interface MemeEntity {
 	frequency?: number;
 	file?: string;
 	type?: string;
-	width?: number;
-	height?: number;
 	created_at?: Date;
 	updated_at?: Date;
 }
