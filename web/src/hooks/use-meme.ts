@@ -17,7 +17,7 @@ export function useMeme(
   meme?: Meme | null,
   memeImageRef?: RefObject<HTMLImageElement>
 ) {
-  const memeFileUrl = meme?.file || "";
+  const memeFileUrl = meme?.file ? `${window.location.origin}${meme.file}` : "";
 
   const memeFileExtension = getFileExtension(memeFileUrl);
   const memeHasCopySupport =

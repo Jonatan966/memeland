@@ -9,6 +9,7 @@ import {
 import { MixerHorizontalIcon } from "@radix-ui/react-icons";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useRef } from "react";
+import { SelectProps } from "@radix-ui/react-select";
 
 export type OrderingType =
   | "creation_new"
@@ -16,17 +17,21 @@ export type OrderingType =
   | "frequency_big"
   | "frequency_small";
 
-interface MemesOrderSelectorProps {
+interface MemesOrderSelectorProps extends SelectProps {
   defaultValue: OrderingType;
   onChange(newValue: OrderingType): void;
 }
 
-export function MemesOrderSelector(props: MemesOrderSelectorProps) {
+export function MemesOrderSelector({
+  defaultValue,
+  onChange,
+  ...props
+}: MemesOrderSelectorProps) {
   const selectRef = useRef<HTMLButtonElement>(null);
   const isOnDesktop = useMediaQuery(["(max-width: 639px)"]);
 
   function onValueChange(newValue: OrderingType) {
-    props.onChange(newValue);
+    onChange(newValue);
 
     if (!selectRef.current) {
       return;
@@ -42,7 +47,11 @@ export function MemesOrderSelector(props: MemesOrderSelectorProps) {
   }
 
   return (
-    <Select defaultValue={props.defaultValue} onValueChange={onValueChange}>
+    <Select
+      defaultValue={defaultValue}
+      onValueChange={onValueChange}
+      {...props}
+    >
       <SelectTrigger className="w-auto" ref={selectRef}>
         <MixerHorizontalIcon className="mr-1" />
 

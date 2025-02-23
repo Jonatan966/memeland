@@ -1,4 +1,11 @@
-import { useState, useEffect, KeyboardEvent, useCallback, useRef } from "react";
+import {
+  useState,
+  useEffect,
+  KeyboardEvent,
+  useCallback,
+  useRef,
+  useContext,
+} from "react";
 import { SunIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
 
@@ -18,8 +25,11 @@ import {
   orderingConfigs,
   OrderingType,
 } from "./components/domain/memes-order-selector";
+import { AuthContext } from "./contexts/AuthContext";
+import { SignIn } from "./components/domain/sign-in";
 
 export function App() {
+  const { user } = useContext(AuthContext);
   const navigationButtonRef = useRef<HTMLButtonElement>(null);
 
   const [pagination, setPagination] = useState({
@@ -34,7 +44,7 @@ export function App() {
   const [selectedMeme, setSelectedMeme] = useState<Meme | null>(null);
   const [isMemeDialogOpen, setIsMemeDialogOpen] = useState(false);
 
-  const hasNextPage = memes.length < totalMemes;
+  const hasNextPage = !!user && memes.length < totalMemes;
 
   const onFetchMemes = useCallback(async () => {
     const reset = pagination.currentPage === 0;
@@ -94,8 +104,13 @@ export function App() {
   }
 
   useEffect(() => {
+    if (!user) {
+      setMemes([]);
+      return;
+    }
+
     onFetchMemes();
-  }, [onFetchMemes]);
+  }, [onFetchMemes, user]);
 
   useEffect(() => {
     const handleInfiniteScroll = () => {
@@ -115,31 +130,32 @@ export function App() {
   return (
     <>
       <header className="container max-sm:px-4 pb-4 sticky top-0 z-10 bg-background">
-        <nav
-          className={cn(
-            "py-4 grid grid-cols-[1fr_auto_auto] gap-4",
-            customStyles.navigation
-          )}
-        >
+        <nav className={cn("py-4 flex gap-4", customStyles.navigation)}>
           <h1
-            className="font-bold text-2xl italic mr-auto max-sm:text-xl flex items-center"
+            className="font-bold text-2xl italic mr-auto max-sm:text-xl flex items-center flex-1"
             style={{ gridArea: "title" }}
           >
             🐸 memeland
           </h1>
 
-          <CreateMemeDialog onAfterCreate={onRequestFirstPage} />
-          <SignOut />
+          {user && (
+            <>
+              <CreateMemeDialog onAfterCreate={onRequestFirstPage} />
+              <SignOut />
+            </>
+          )}
         </nav>
 
         <div className="flex gap-2">
           <Input
             placeholder="pesquise por um termo"
             onKeyDown={handleSearchMemes}
+            disabled={!user}
           />
 
           <MemesOrderSelector
             defaultValue={pagination.order}
+            disabled={!user}
             onChange={(newOrder) =>
               setPagination((old) => ({
                 ...old,
@@ -182,6 +198,12 @@ export function App() {
         isOpen={isMemeDialogOpen}
         onClose={() => setIsMemeDialogOpen(false)}
       />
+
+      {!user && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <SignIn />
+        </div>
+      )}
     </>
   );
 }
