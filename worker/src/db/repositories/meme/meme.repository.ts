@@ -5,6 +5,8 @@ interface FindManyOpt {
 	account_id: string;
 	take: number;
 	offset: number;
+	orderBy?: 'created_at' | 'frequency';
+	orderAsc?: boolean;
 }
 
 interface IncrementFrequencyOpt {
@@ -20,8 +22,11 @@ export function makeMemeRepository(db: D1Database) {
 
 			return count;
 		},
-		async findMany({ account_id, take, offset }: FindManyOpt): Promise<MemeEntity[]> {
-			const result = await db.prepare('SELECT * FROM meme WHERE account_id = ? LIMIT ? OFFSET ?').bind(account_id, take, offset).run();
+		async findMany({ account_id, take, offset, orderBy, orderAsc }: FindManyOpt): Promise<MemeEntity[]> {
+			const result = await db
+				.prepare(`SELECT * FROM meme WHERE account_id = ? ORDER BY ${orderBy} ${orderAsc ? 'ASC' : 'DESC'} LIMIT ? OFFSET ?`)
+				.bind(account_id, take, offset)
+				.run();
 
 			const memes = result.results.map((meme) => ({ ...meme, keywords: JSON.parse(meme.keywords as string) })) as MemeEntity[];
 
