@@ -1,4 +1,3 @@
-import { FileDimensions } from "@/utils/get-file-dimensions";
 import Cookies from "js-cookie";
 
 export interface Meme {
@@ -7,8 +6,6 @@ export interface Meme {
   keywords: string[];
   file: string;
   type: string;
-  width?: number;
-  height?: number;
   index?: number;
   isDummy?: boolean;
 }
@@ -26,7 +23,6 @@ interface SendMemeProps {
   description: string;
   keywords: string[];
   meme: File;
-  dimensions?: FileDimensions;
 }
 
 interface GenerateKeywordsProps {
@@ -134,7 +130,6 @@ export const workerService = {
     formData.append("description", data.description);
     formData.append("keywords", JSON.stringify(data.keywords));
     formData.append("meme", data.meme);
-    formData.append("dimensions", JSON.stringify(data.dimensions));
 
     const response = await fetch(`${workerService.apiUrl}/memes`, {
       method: "POST",

@@ -26,7 +26,6 @@ import { workerService } from "@/services/worker";
 import { useState } from "react";
 import { ImageIcon, SunIcon } from "@radix-ui/react-icons";
 import { toast } from "sonner";
-import { getFileDimensions } from "@/utils/get-file-dimensions";
 
 interface CreateMemeDialogProps {
   onAfterCreate(): void;
@@ -59,12 +58,7 @@ export function CreateMemeDialog({ onAfterCreate }: CreateMemeDialogProps) {
     setIsSendingMeme(true);
 
     try {
-      const fileDimensions = await getFileDimensions(data.meme);
-
-      await workerService.sendMeme({
-        ...data,
-        dimensions: fileDimensions,
-      });
+      await workerService.sendMeme(data);
 
       setIsDialogOpen(false);
 

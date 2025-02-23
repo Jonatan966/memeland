@@ -22,7 +22,6 @@ memesRouter.post(
 
 		const description = String(formData.get('description'));
 		const keywords = String(formData.get('keywords'));
-		const dimensions = JSON.parse(String(formData.get('dimensions')));
 
 		const memeFile = formData.get('meme') as File;
 		const memeFileData = await memeFile.arrayBuffer();
@@ -68,8 +67,6 @@ memesRouter.post(
 			account_id: account.id,
 			file: memeFileUrl,
 			type: availableMemeFileTypes[memeFile.type],
-			width: dimensions?.width,
-			height: dimensions?.height,
 		});
 
 		const vectorResult = await context.env.VECTORIZE.insert([
@@ -82,8 +79,6 @@ memesRouter.post(
 					user_id: account.id!,
 					file: memeFileUrl,
 					type: availableMemeFileTypes[memeFile.type],
-					width: dimensions?.width,
-					height: dimensions?.height,
 				},
 			},
 		]);
