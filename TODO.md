@@ -12,7 +12,7 @@
 - [] Ajustes finais
   - [x] Fazer o seletor de ordenação funcionar corretamente
   - [x] Fazer o botão de copiar meme funcionar corretamente
-  - [] Colocar os vídeos com metade do volume por padrão
+  - [x] Colocar os vídeos com metade do volume por padrão
   - [] Lidar com memes que não carregam
   - [] Colocar botão de login no lugar dos botões de Novo Meme/Sair
 

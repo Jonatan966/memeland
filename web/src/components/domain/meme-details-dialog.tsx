@@ -37,6 +37,7 @@ export function MemeDetailsDialog({
           <video
             src={meme.file}
             className="h-full w-full max-h-[50svh]"
+            onLoadStart={(e) => (e.currentTarget.volume = 0.5)}
             controls
           />
         ) : (
