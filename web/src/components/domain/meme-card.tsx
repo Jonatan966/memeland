@@ -3,7 +3,7 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { FileIcon } from "@radix-ui/react-icons";
 import { MEME_LABELS, useMeme } from "@/hooks/use-meme";
-import { useMemo, useRef } from "react";
+import { useRef } from "react";
 import { useMediaQuery } from "@/hooks/use-media-query";
 
 interface MemeCardProps {
@@ -15,7 +15,6 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
   const isOnDesktop = useMediaQuery(["(max-width: 639px)"]);
 
   const memeImageRef = useRef<HTMLImageElement>(null);
-  const fakeImageRef = useRef<HTMLImageElement>(null);
 
   const {
     memeHasCopySupport,
@@ -24,24 +23,10 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
     onCopyMemeLink,
   } = useMeme(meme, memeImageRef);
 
-  const fakeMemeImage = useMemo(() => {
-    const reduceScale = 0.5;
-    const canvas = document.createElement("canvas");
-
-    canvas.width = (meme?.width || 500) * reduceScale;
-    canvas.height = (meme?.height || 500) * reduceScale;
-
-    return canvas.toDataURL("base64");
-  }, [meme]);
-
-  if (meme.isDummy) {
-    return <img src={fakeMemeImage} alt="fake image" ref={fakeImageRef} />;
-  }
-
   return (
     <div
       data-index={meme?.index}
-      className="relative cursor-pointer border hover:border-green-500 mb-4 group"
+      className="relative cursor-pointer bg-border border hover:border-green-500 group h-48"
       onClick={onSelect}
     >
       {memeFileExtension === "mp4" ? (
@@ -52,28 +37,20 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
           autoPlay={!!isOnDesktop}
           controls={false}
           preload="none"
-          className="w-full pointer-events-none"
-          style={{ display: "none" }}
-          onLoadedData={(event) => {
-            fakeImageRef.current?.remove();
-            event.currentTarget.style.display = "initial";
-          }}
+          className="w-full h-full pointer-events-none"
         />
       ) : (
         <>
           <img
             src={meme.file}
             alt="Photo"
-            className="w-full"
+            className="w-full h-full object-contain"
             loading="lazy"
             crossOrigin="anonymous"
             ref={memeImageRef}
-            onLoad={() => fakeImageRef.current?.remove()}
           />
         </>
       )}
-
-      <img src={fakeMemeImage} alt="fake image" ref={fakeImageRef} />
 
       <div className="absolute inset-0 flex items-start">
         <Badge>{MEME_LABELS?.[meme.type]}</Badge>
