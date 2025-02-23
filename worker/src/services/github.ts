@@ -28,6 +28,10 @@ export function createGithubService(envs: Env) {
 
 			const authResult = await response.json<AccessTokenResponse>();
 
+			if ([200, 201].includes(response.status)) {
+				console.log('[githubService] getAccessToken() error', authResult);
+			}
+
 			return authResult;
 		},
 		async getUser(access_token: string): Promise<User> {
@@ -40,6 +44,10 @@ export function createGithubService(envs: Env) {
 			});
 
 			const userResult = await response.json<User>();
+
+			if (response.status !== 200) {
+				console.log('[githubService] getUser() error', userResult);
+			}
 
 			return userResult;
 		},
