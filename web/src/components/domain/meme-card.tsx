@@ -1,10 +1,11 @@
 import { Meme } from "@/services/worker";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { FileIcon } from "@radix-ui/react-icons";
+import { FileIcon, SunIcon } from "@radix-ui/react-icons";
 import { MEME_LABELS, useMeme } from "@/hooks/use-meme";
-import { useRef } from "react";
+import { SyntheticEvent, useRef, useState } from "react";
 import { useMediaQuery } from "@/hooks/use-media-query";
+import { cn } from "@/lib/utils";
 
 interface MemeCardProps {
   meme: Meme;
@@ -12,6 +13,7 @@ interface MemeCardProps {
 }
 
 export function MemeCard({ meme, onSelect }: MemeCardProps) {
+  const [isLoading, setIsLoading] = useState(true);
   const isOnDesktop = useMediaQuery(["(max-width: 639px)"]);
 
   const memeImageRef = useRef<HTMLImageElement>(null);
@@ -23,12 +25,27 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
     onCopyMemeLink,
   } = useMeme(meme, memeImageRef);
 
+  function onLoadMeme(e: SyntheticEvent<HTMLElement>) {
+    e.currentTarget.style.opacity = "initial";
+    setIsLoading(false);
+  }
+
   return (
     <div
       data-index={meme?.index}
-      className="relative cursor-pointer bg-border border hover:border-green-500 group h-48"
+      className={cn(
+        "relative cursor-pointer bg-border border hover:border-green-500 group h-48",
+        {
+          "pointer-events-none": isLoading,
+        }
+      )}
       onClick={onSelect}
     >
+      {isLoading && (
+        <div className="h-full w-full flex">
+          <SunIcon className="animate-spin m-auto w-8 h-8" />
+        </div>
+      )}
       {memeFileExtension === "mp4" ? (
         <video
           src={meme.file}
@@ -38,6 +55,8 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
           controls={false}
           preload="none"
           className="w-full h-full pointer-events-none"
+          style={{ opacity: 0 }}
+          onLoadedData={onLoadMeme}
         />
       ) : (
         <>
@@ -48,6 +67,8 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
             loading="lazy"
             crossOrigin="anonymous"
             ref={memeImageRef}
+            style={{ opacity: 0 }}
+            onLoad={onLoadMeme}
           />
         </>
       )}
@@ -55,7 +76,7 @@ export function MemeCard({ meme, onSelect }: MemeCardProps) {
       <div className="absolute inset-0 flex items-start">
         <Badge>{MEME_LABELS?.[meme.type]}</Badge>
       </div>
-      <div className="absolute bottom-1 left-1 right-1 opacity-0 group-hover:opacity-100 flex gap-1">
+      <div className="absolute bottom-1 left-1 right-1 opacity-0 flex gap-1 group-hover:opacity-100">
         {memeHasCopySupport && (
           <Button
             size="icon"
