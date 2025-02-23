@@ -145,29 +145,40 @@ memesRouter.get('/search', async (context) => {
 	);
 });
 
-memesRouter.get('/', async (context) => {
-	const { response, account } = await authMiddleware(context);
+memesRouter.get(
+	'/',
+	zValidator(
+		'query',
+		z.object({
+			page: z.coerce.number(),
+			take: z.coerce.number().min(1),
+			orderBy: z.enum(['created_at', 'frequency']),
+			orderAsc: z.ostring(),
+		})
+	),
+	async (context) => {
+		const { response, account } = await authMiddleware(context);
 
-	if (response) {
-		return response;
+		if (response) {
+			return response;
+		}
+
+		const { page, take, orderBy, orderAsc } = context.req.valid('query');
+
+		const offset = page * take;
+
+		const memeRepository = makeMemeRepository(context.env.DB);
+
+		const [totalMemes, memes] = await Promise.all([
+			memeRepository.count(account.id!),
+			memeRepository.findMany({ account_id: account.id!, offset, take, orderBy, orderAsc: !!orderAsc }),
+		]);
+
+		const hasNextPage = offset + memes.length < totalMemes;
+
+		return context.json({ memes, count: totalMemes, hasNextPage });
 	}
-
-	const page = Number(context.req.query('page')) || 0;
-	const take = Number(context.req.query('take')) || 20;
-
-	const offset = page * take;
-
-	const memeRepository = makeMemeRepository(context.env.DB);
-
-	const [totalMemes, memes] = await Promise.all([
-		memeRepository.count(account.id!),
-		memeRepository.findMany({ account_id: account.id!, offset, take }),
-	]);
-
-	const hasNextPage = offset + memes.length < totalMemes;
-
-	return context.json({ memes, count: totalMemes, hasNextPage });
-});
+);
 
 memesRouter.put('/:meme_id/frequency', async (context) => {
 	const { response, account } = await authMiddleware(context);
