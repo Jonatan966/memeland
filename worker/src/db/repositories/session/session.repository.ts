@@ -3,6 +3,8 @@ import { SessionEntity } from './session.entity';
 export function makeSessionRepository(db: D1Database) {
 	return {
 		async create(session: Pick<SessionEntity, 'account_id'>) {
+			console.log('[session] create()', session);
+
 			const payload = {
 				id: crypto.randomUUID(),
 				refresh_id: crypto.randomUUID(),
@@ -17,11 +19,15 @@ export function makeSessionRepository(db: D1Database) {
 			return payload;
 		},
 		async findByRefreshId(refresh_id: string) {
+			console.log('[session] findByRefreshId()', { refresh_id });
+
 			const session = await db.prepare('SELECT * FROM session WHERE refresh_id = ?').bind(refresh_id).first<SessionEntity>();
 
 			return session;
 		},
 		async updateRefreshId(session_id: string) {
+			console.log('[session] updateRefreshId()', { session_id });
+
 			const newRefreshId = crypto.randomUUID();
 
 			await db.prepare('UPDATE session SET refresh_id = ? WHERE id = ?').bind(newRefreshId, session_id).run();
