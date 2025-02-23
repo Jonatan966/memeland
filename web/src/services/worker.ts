@@ -36,6 +36,7 @@ interface SearchMemesProps {
 interface ListMemesProps {
   itemsPerPage: number;
   currentPage?: number;
+  order: MemeOrderingConfig;
 }
 
 interface ListMemesReturn {
@@ -177,15 +178,19 @@ export const workerService = {
     return result;
   },
   async listMemes(props: ListMemesProps): Promise<ListMemesReturn> {
-    const response = await fetch(
-      `${workerService.apiUrl}/memes?page=${props.currentPage}&take=${props.itemsPerPage}`,
-      {
-        method: "GET",
-        headers: {
-          authorization: await auth.getToken(),
-        },
-      }
-    );
+    const query = new URLSearchParams({
+      page: String(props.currentPage || ""),
+      take: String(props.itemsPerPage),
+      orderBy: props.order.by,
+      orderAsc: props.order.ascending ? "true" : "",
+    }).toString();
+
+    const response = await fetch(`${workerService.apiUrl}/memes?${query}`, {
+      method: "GET",
+      headers: {
+        authorization: await auth.getToken(),
+      },
+    });
 
     const result = await response.json();
 

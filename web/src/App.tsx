@@ -15,6 +15,7 @@ import { Button } from "./components/ui/button";
 import { useDebounce } from "./hooks/use-debounce";
 import {
   MemesOrderSelector,
+  orderingConfigs,
   OrderingType,
 } from "./components/domain/memes-order-selector";
 
@@ -41,7 +42,7 @@ export function App() {
     const { memes, count } = await workerService.listMemes({
       itemsPerPage: pagination.itemsPerPage,
       currentPage: pagination.currentPage,
-      // order: orderingConfigs[pagination.order],
+      order: orderingConfigs[pagination.order],
     });
 
     setMemes((old) => (reset ? memes : [...old, ...memes]));
