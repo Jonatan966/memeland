@@ -1,9 +1,7 @@
 import { auth, User, workerService } from "@/services/worker";
 import { createContext, ReactNode, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { SunIcon, GitHubLogoIcon } from "@radix-ui/react-icons";
-import { Button } from "@/components/ui/button";
-import { mountGithubAuthUrl } from "@/utils/mount-github-auth-url";
+import { SunIcon } from "@radix-ui/react-icons";
 import { setUrlSearchParams } from "@/utils/set-url-search-params";
 
 interface AuthContextProps {
@@ -57,17 +55,6 @@ export function AuthProvider(props: { children: ReactNode }) {
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <SunIcon className="animate-spin w-8 h-8" />
         <strong>Carregando sessão...</strong>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <Button onClick={() => (window.location.href = mountGithubAuthUrl())}>
-          <GitHubLogoIcon className="mr-1" />
-          Login com o Github
-        </Button>
       </div>
     );
   }
